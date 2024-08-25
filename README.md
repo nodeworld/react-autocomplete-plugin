@@ -1,2 +1,2 @@
-# react-autocomplete-plugin
-React autocomplete plugin
+# react-plugin-with-rollup
+react-plugin-with-rollup
