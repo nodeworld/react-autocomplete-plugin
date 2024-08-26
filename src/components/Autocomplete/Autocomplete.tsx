@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { CustomAriaType, CustomClassType, CustomNgStyleType } from "../../util/types/types";
+import { CustomAriaType, CustomClassType, CustomStyleType } from "../../util/types/types";
 import InputLabel from "./InputLabel";
 import Core from "./Core";
 import './Autocomplete.css';
@@ -20,7 +20,7 @@ export type AutoCompleteProps = {
     disableListFn?: Function | undefined;
     customClass?: CustomClassType;
     isAutoCompleteDisabled?: boolean;
-    customStyle?: CustomNgStyleType;
+    customStyle?: CustomStyleType;
     triggerBlurEvent?: Function | undefined; // function will accept event, data as parameters.
     triggerOnFocusEvent?: Function | undefined;
     broadcastSelectedValue?: Function | undefined;
@@ -44,6 +44,8 @@ function Autocomplete(props: AutoCompleteProps) {
 
     const customStyle = props.customStyle ? props.customStyle : {};
 
+    const inputLabel = props.inputLabel ? props.inputLabel : 'Select a value';
+
     const assignClass = (classTobeMandatory?: string, classes?: string) => {
         if (!classTobeMandatory && !classes) { return; }
         let templateClass = classTobeMandatory ? classTobeMandatory : '';
@@ -64,7 +66,7 @@ function Autocomplete(props: AutoCompleteProps) {
                 className={assignClass('label-container', customClass.inputLabelContainerClass)}
                 style={customStyle.inputLabelContainerStyle ? customStyle.inputLabelContainerStyle : {}}>
                 <InputLabel
-                    inputLabel={props.inputLabel}
+                    inputLabel={inputLabel}
                     ariaInputLabel={props.aria?.ariaInputLabel}
                     key={'label-key'}
                     inputLabelClass={props.customClass?.inputLabelClass}
