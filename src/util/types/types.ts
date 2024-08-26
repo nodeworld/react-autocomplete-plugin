@@ -1,6 +1,5 @@
 export type CustomClassType = {
     parentContainerClass?: string;
-    inputFieldContainerClass?:string;
     inputFieldClass?: string;
     listContainerClass?: string;
     dropdownUnorderedListClass?: string;
@@ -12,13 +11,13 @@ export type CustomClassType = {
     customSpinnerClass?: string;
   }
   
-export type CustomNgStyleType = {
+export type CustomStyleType = {
     parentContainerStyle?: React.CSSProperties;
-    inputFieldContainerStyle?: React.CSSProperties;
     inputFieldStyle?: React.CSSProperties;
     listContainerStyle?: React.CSSProperties;
     dropdownUnorderedListStyle?: React.CSSProperties;
     dropdownListStyle?: React.CSSProperties;
+    disableListStyle?: React.CSSProperties;
     noResultStyle?: React.CSSProperties;
     inputLabelContainerStyle?: React.CSSProperties;
     inputLabelStyle?: React.CSSProperties;

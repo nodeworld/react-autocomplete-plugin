@@ -1,6 +1,6 @@
 import React, { BaseSyntheticEvent, useCallback, useEffect, useRef, useState } from "react";
 import { assignClass } from "../../util/helpers/classes";
-import { CustomAriaType, CustomClassType, CustomNgStyleType } from "../../util/types/types";
+import { CustomAriaType, CustomClassType, CustomStyleType } from "../../util/types/types";
 import InputField from "./InputField";
 import DropdownList from "./DropdownList";
 
@@ -25,7 +25,7 @@ type InputFieldType = {
     disableListFn?: Function | undefined;
     triggerClearSelectionEvent: Function | undefined;
     customClass?: CustomClassType;
-    customStyle?: CustomNgStyleType;
+    customStyle?: CustomStyleType;
     aria?: CustomAriaType;
     showLoadingSpinner?: boolean;
     isCustomSpinner?: boolean;
@@ -134,10 +134,10 @@ function Core(props: InputFieldType) {
         // setisOnFocus((prev) => !prev);
     }
 
-    const clearSearch = (_event: any) => {
+    const clearSearch = (event: any) => {
         searchValue.current!.value = '';
         if (props.triggerClearSelectionEvent && typeof props.triggerClearSelectionEvent === 'function') {
-            props.triggerClearSelectionEvent();
+            props.triggerClearSelectionEvent(event);
         }
     }
 
@@ -339,7 +339,10 @@ function Core(props: InputFieldType) {
                 showClearOption={props.showClearOption}
                 showdropDownArrow={props.showdropDownArrow} />
             {
-                isOnFocus && <div className={assignClass('auto-complete-list', props?.customClass?.listContainerClass)} aria-label={props.aria?.ariaListContainer ? props.aria.ariaListContainer : 'Autocomplete list container.'}>
+                isOnFocus && <div
+                            className={assignClass('auto-complete-list', props?.customClass?.listContainerClass)}
+                            style={props?.customStyle?.listContainerStyle ? props.customStyle.listContainerStyle : {}}
+                            aria-label={props.aria?.ariaListContainer ? props.aria.ariaListContainer : 'Autocomplete list container.'}>
                     <div id="list-container">
                         <ul id="list-id"
                             ref={unOrderedList}
@@ -360,8 +363,10 @@ function Core(props: InputFieldType) {
                                             data={data}
                                             disableListFn={props.disableListFn}
                                             disableProperty={props.disableProperty}
+                                            disableListClass={props.customClass?.disableListClass}
                                             dropdownListClass={props.customClass?.dropdownListClass}
                                             dropdownListStyle={props.customStyle?.dropdownListStyle}
+                                            disableListStyle={props.customStyle?.disableListStyle}
                                             key={index}
                                             objectProperty={props.objectProperty}
                                             ref={listRef}
