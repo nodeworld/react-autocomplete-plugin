@@ -15,6 +15,7 @@ type InputFieldType = {
     showdropDownArrow?: boolean;
     showClearOption?: boolean;
     isAutoCompleteDisabled?: boolean;
+    totalRecords?: number;
     ariaRole?: string;
     ariaRoleDescription?: string;
     ariaInputField?: string;
@@ -167,6 +168,9 @@ function Core(props: InputFieldType) {
     const listScrollEvent = (event: BaseSyntheticEvent) => {
         if (filteredData.length <= 0) { return; }
         if (event.target.offsetHeight + event.target.scrollTop >= event.target.scrollHeight) {
+            if (props.totalRecords && scrollDownIndex.current >= props.totalRecords) {
+                return;
+            }
             loadNextSetData();
         } else if (event.target.scrollTop < 10 && filteredData.length > initialVisibleData) {
             initData();
@@ -207,7 +211,6 @@ function Core(props: InputFieldType) {
                 if (props.showLoadingSpinner) {
                     setShowSpinner(true);
                     setTimeout(() => {
-                        // unOrderedList.current?.scrollIntoView({ behavior: 'smooth' });
                         unOrderedList.current?.scrollTo(0, unOrderedList.current.scrollHeight + 10);
                     }, 150)
                     
