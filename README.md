@@ -3,17 +3,21 @@
 
 A simple, powerful, lightweight and customizable autocomplete tool programmed for React projects!
 
-## Whats better in this package?
+## Recommended React version 
 
-- Lightweight
+React 16.8+, 17, 18 or higher
+
+## Package benefits
+
+- Lightweight package
 - No 3rd party packages installed
-- Supports large data set
-- Customizable scroll functionality
+- Supports large dropdown dataset
+- Advanced and customizable scroll functionality
 - Supports custom events
-- Easy virtual scrolling for large data set without 3rd party
-- Custom classes and ng-styles are allowed
-- Ability to use 3rd party style packages like bootstrap, tailwind. (You can update the classes from your component)
-- Solid test cases to validate the module.
+- Virtual scrolling for large data sets
+- Ability to apply custom classes and css styles
+- Ability to integrate 3rd party styling packages like bootstrap, tailwind or other CSS libraries.
+- Complete test case coverage.
 
 ## Installation
 
@@ -21,6 +25,22 @@ Install react-autocomplete-plugin with npm
 
 ```bash
   npm install react-autocomplete-plugin --save
+```
+
+or
+
+```bash
+  npm i react-autocomplete-plugin --save
+```
+
+## Running Tests
+
+react-autocomplete-plugin has solid test cases to make sure components executes without any issues.
+
+To run tests, run the following command
+
+```bash
+  npm run test
 ```
 
 ## API Usage
@@ -145,12 +165,12 @@ customClassType: CustomClassType = {
 </Autocomplete>
 ```
 
-## Adding Custom NgStyle to autocomplete
+## Adding Custom CSS styles to autocomplete
 
-#### Import CustomNgStyleType from the module (Optional).
+#### Import CustomStyleType from the module (Optional).
 
 
-| CustomNgStyleTypes | Required | Description |
+| CustomStyleTypes | Required | Description |
 | :-------- | :-----------| :-----------|
 | `parentContainerStyle`      | `No` | Adds style to `div` surrounding the input field and dropdown list. |
 | `inputFieldStyle`      | `No` | Adds style to `input textfield`|
@@ -191,3 +211,18 @@ customStyle: CustomStyleType = {
 | `ariaULList`          | `No` | Adds ARIA label to `ul` list item |
 | `ariaListContainer`   | `No` | Adds ARIA label to list container `div`. |
 | `ariaInputLabel`      | `No` | Adds ARIA label to `label field`. |
+
+## Support
+
+Please raise an issue in github repository
+
+Github Link - [Raise an issue](https://github.com/nodeworld/react-autocomplete-plugin/issues)
+
+
+## Roadmap
+
+Will deploy more features in future.
+
+## Github link
+
+Github Link - [react-autocomplete-plugin](https://github.com/nodeworld/react-autocomplete-plugin)

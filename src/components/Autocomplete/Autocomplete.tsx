@@ -33,6 +33,7 @@ export type AutoCompleteProps = {
     showInputlabel?: boolean;
     aria?: CustomAriaType;
     isApiLoad?: boolean;
+    searchFn?: Function | undefined;
 }
 
 function Autocomplete(props: AutoCompleteProps) {
@@ -106,6 +107,8 @@ function Autocomplete(props: AutoCompleteProps) {
                     isApiLoad={props.isApiLoad}
                     scrollThreshold={props.scrollThreshold}
                     triggerOnFocusEvent={props.triggerOnFocusEvent}
+                    totalRecords={props.totalRecords}
+                    searchFn={props.searchFn}
                     />
             {/* </div> */}
         </div>
