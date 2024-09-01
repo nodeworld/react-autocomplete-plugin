@@ -32,7 +32,7 @@ function DropdownList(props: ListType, listRef: Ref<HTMLLIElement>) {
             <li
                 tabIndex={0}
                 ref={listRef}
-                className={`${assignClass('autocomplete-data-list', props?.dropdownListClass)}${assignClass('autocomplete-data-list', props?.disableListClass)}${((props.disableProperty && props.data[props.disableProperty]) || (props.disableListFn && props.disableListFn(props.index, props.data))) ? ' disable-list-element' : ''}`}
+                className={`${assignClass('autocomplete-data-list', props?.dropdownListClass)} ${assignClass('autocomplete-data-list', props?.disableListClass)}${((props.disableProperty && props.data[props.disableProperty]) || (props.disableListFn && props.disableListFn(props.index, props.data))) ? ' disable-list-element' : ''}`}
                 style={applyStyle()}
                 key={props.index}
                 onMouseDown={() => props.onSelect(props.data)}
