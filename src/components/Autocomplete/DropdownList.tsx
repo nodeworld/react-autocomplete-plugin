@@ -27,12 +27,25 @@ function DropdownList(props: ListType, listRef: Ref<HTMLLIElement>) {
         return style;
     }, [props.disableListStyle, props.dropdownListStyle]);
 
+
+    const applyClasses = useCallback(() => {
+        let classes = '';
+        if (props?.dropdownListClass) {
+            classes = props.dropdownListClass;
+        }
+        if (props?.disableListClass) {
+            classes = classes + ' ' + props.disableListClass;
+        }
+        if (classes && classes !== '') { return assignClass('autocomplete-data-list', classes); }
+        return assignClass('autocomplete-data-list');
+    }, [props.dropdownListClass, props.disableListClass]);
+
     return (
         <React.Fragment>
             <li
                 tabIndex={0}
                 ref={listRef}
-                className={`${assignClass('autocomplete-data-list', props?.dropdownListClass)} ${assignClass('autocomplete-data-list', props?.disableListClass)}${((props.disableProperty && props.data[props.disableProperty]) || (props.disableListFn && props.disableListFn(props.index, props.data))) ? ' disable-list-element' : ''}`}
+                className={`${applyClasses()}${((props.disableProperty && props.data[props.disableProperty]) || (props.disableListFn && props.disableListFn(props.index, props.data))) ? ' disable-list-element' : ''}`}
                 style={applyStyle()}
                 key={props.index}
                 onMouseDown={() => props.onSelect(props.data)}

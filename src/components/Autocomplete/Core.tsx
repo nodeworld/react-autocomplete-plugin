@@ -41,9 +41,6 @@ type InputFieldType = {
 
 function Core(props: InputFieldType) {
 
-    // TODO: _setInitRenderInProgress not being used anywhere
-    const [initRenderInProgress, _setInitRenderInProgress] = useState<boolean>(true);
-
     const searchValue = useRef<HTMLInputElement>(null);
 
     const scrollDownIndex = useRef(0);
@@ -290,10 +287,10 @@ function Core(props: InputFieldType) {
             loadNextApiSet(props.dropdownData)
             return;
         }
-    }, [dataLength, isEventEmitted, props.triggerApiLoadEvent, loadNextApiSet])
+    }, [dataLength, isEventEmitted, props.triggerApiLoadEvent, loadNextApiSet, props.dropdownData])
 
     useEffect(() => {
-        if (isEventEmitted || !initRenderInProgress || dataLength > 0) { return; }
+        if (isEventEmitted || dataLength > 0) { return; }
         if (props.defaultValue) {
             if (props.objectProperty) {
                 let getValue;
@@ -320,7 +317,7 @@ function Core(props: InputFieldType) {
         if(props.dropdownData.length > 0) {
             setData(props.dropdownData);
         }
-    }, [props.dropdownData, setData, props.defaultValue, props.objectProperty, isEventEmitted, initRenderInProgress, dataLength]);
+    }, [props.dropdownData, setData, props.defaultValue, props.objectProperty, isEventEmitted, dataLength]);
 
     return (
         <React.Fragment>
