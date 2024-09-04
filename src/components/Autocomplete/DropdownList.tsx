@@ -8,9 +8,7 @@ type ListType = {
     disableProperty?: string;
     disableListFn?: Function;
     dropdownListClass?: string;
-    disableListClass?: string;
     dropdownListStyle?: React.CSSProperties;
-    disableListStyle?: React.CSSProperties;
     onSelect: Function;
 }
 
@@ -21,11 +19,8 @@ function DropdownList(props: ListType, listRef: Ref<HTMLLIElement>) {
         if (props?.dropdownListStyle) {
             style = {...props.dropdownListStyle}
         }
-        if (props?.disableListStyle) {
-            style = {...style, ...props.disableListStyle}
-        }
         return style;
-    }, [props.disableListStyle, props.dropdownListStyle]);
+    }, [props.dropdownListStyle]);
 
 
     const applyClasses = useCallback(() => {
@@ -33,12 +28,9 @@ function DropdownList(props: ListType, listRef: Ref<HTMLLIElement>) {
         if (props?.dropdownListClass) {
             classes = props.dropdownListClass;
         }
-        if (props?.disableListClass) {
-            classes = classes + ' ' + props.disableListClass;
-        }
         if (classes && classes !== '') { return assignClass('autocomplete-data-list', classes); }
         return assignClass('autocomplete-data-list');
-    }, [props.dropdownListClass, props.disableListClass]);
+    }, [props.dropdownListClass]);
 
     return (
         <React.Fragment>

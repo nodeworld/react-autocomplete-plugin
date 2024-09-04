@@ -363,10 +363,8 @@ function Core(props: InputFieldType) {
                                             data={data}
                                             disableListFn={props.disableListFn}
                                             disableProperty={props.disableProperty}
-                                            disableListClass={props.customClass?.disableListClass}
                                             dropdownListClass={props.customClass?.dropdownListClass}
                                             dropdownListStyle={props.customStyle?.dropdownListStyle}
-                                            disableListStyle={props.customStyle?.disableListStyle}
                                             key={index}
                                             objectProperty={props.objectProperty}
                                             ref={listRef}

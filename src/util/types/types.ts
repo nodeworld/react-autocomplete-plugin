@@ -5,7 +5,6 @@ export type CustomClassType = {
     dropdownUnorderedListClass?: string;
     dropdownListClass?: string;
     noResultClass?: string;
-    disableListClass?:string;
     inputLabelContainerClass?:string;
     inputLabelClass?: string;
     customSpinnerClass?: string;
@@ -17,7 +16,6 @@ export type CustomStyleType = {
     listContainerStyle?: React.CSSProperties;
     dropdownUnorderedListStyle?: React.CSSProperties;
     dropdownListStyle?: React.CSSProperties;
-    disableListStyle?: React.CSSProperties;
     noResultStyle?: React.CSSProperties;
     inputLabelContainerStyle?: React.CSSProperties;
     inputLabelStyle?: React.CSSProperties;
