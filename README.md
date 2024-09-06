@@ -7,15 +7,15 @@ A simple, powerful, lightweight and customizable autocomplete tool programmed fo
 
 React 16.8+, 17, 18 or higher
 
-## Package benefits
+## Package information
 
-- Lightweight package
-- No 3rd party packages installed
-- Supports large dropdown dataset
+- Lightweight module with complete customization
+- No 3rd party package installed in this module
+- Supports lazy loading and large dataset
 - Advanced and customizable scroll functionality
 - Supports custom events
 - Virtual scrolling for large data sets
-- Ability to apply custom classes and css styles
+- Supports custom classes and custom css styles at various DOM levels
 - Ability to integrate 3rd party styling packages like bootstrap, tailwind or other CSS libraries.
 - Complete test case coverage.
 
@@ -30,7 +30,7 @@ Install react-autocomplete-plugin with npm
 or
 
 ```bash
-  npm i react-autocomplete-plugin --save
+  npm i react-autocomplete-plugin
 ```
 
 ## Running Tests
@@ -47,16 +47,16 @@ To run tests, run the following command
 
 | Props | Type  | Required | Description |
 | -------- | ------- | ------- | ------- |
-| `dropdownData` | `string[] or object[]`  | **Yes**. | Accepts array of strings or numbers or array of objects |  |
-| `objectProperty` | `string` |**_Yes_** | Required only if `dropdownData` is object[]. Helps to display dropdown value in dropdown list. |
+| `dropdownData` | `string[], number[], object[] or any[]`  | **Yes**. | Accepts array of strings, numbers or array of objects. |  |
+| `objectProperty` | `string` |**_Yes_** | Required only if `dropdownData` is object[]. `objectProperty` will determine the value to be displayed in dropdown. |
 |`initialVisibleData`| `number` | `No` | `initialVisibleData` denotes the number of records that will be displayed in dropdown list. Default value is 1000. It can be customized as per project requirement or can be left untouched. |
 |`broadcastSelectedValue`|`Function` |**Yes** | Custom function to broadcast the selected value when dropdown value is selected from list. Accepts one parameter which will give the selected value. |
 | `placeHolder` | `string` | `No` | Custom placeholder for auto-complete input field. |
 | `scrollData` | `number`| `No` | 1000 by default. Displays 1000 records by default. Can be changed as per project convenience. |
 | `scrollThreshold` | `number` | `No` | 3 by default. Helps to boost performance. It controls the scroll data and removes top or botton records during user scroll based on the scrollThreshold & scrollData configured. Check below for more details. |
-|`defaultValue`| `string` or `object` | `No` | `defaultValue` pre-populates the value in text-field by matching the value from dropdown data. It can be a simple value or simple json object. For simple json object, `objectProperty` value should be available. |
+|`defaultValue`| `string` or `object` | `No` | `defaultValue` pre-populates the value in input textfield by matching the value from dropdown data. It can be a simple value or simple json object. For simple json object, `objectProperty` value should be available. |
 |`totalRecords` | `number` | `No` | If total number of records is known, totalRecords can be provided which will avoid extra condtions that will be executed in the package.
-|`disableProperty` | `string` | `No` | To disable specific dropdown list in dropdown. User cannot select the dropdown if disabled. This property can be used for object[] dropdown and `disableProperty` should be one of the boolean property in object|
+|`disableProperty` | `string` | `No` | To disable specific dropdown list in dropdown from being selected. This property can be used when dropdownData is an object[] and the `disableProperty` should be a property name from the object which can determine whether the specific list should be disabled from selection. Eg: If an object conatins a property `disabled`, then this property name can be passed to `disableProperty` props to disbale the list from selection when condition matches. |
 |`disableListFn` |`Function` |`No` | If disable should be calculated dynamically using a function and custom code, assign customized function to `disableListFn`. disableListFn accepts two parameters (index, data)|
 |`searchFn` |`Function` |`No` | Customized search function. Customized search function accepts one parameter, `event`. On keyUp, the customized search function will be called to perform custom execution.|
 |`noSearchResultMessage` |`string` |`No` | By default **No results found** message will be displayed when search result is 0  |
@@ -103,7 +103,7 @@ For dropdown object array, Eg: [{"name": "Alex"}, {"name": "John"}], do as below
 </Autocomplete>
 ```
 
-## Setting `scrollThreshold` & `initialVisibleData` for maximizng performance
+## Setting `scrollThreshold` & `initialVisibleData` for maximizing performance
 
 By default, `initialVisibleData` is set to 1000 and `scrollThreshold` is set to 3. It can be customized as per requirement.
 
@@ -144,7 +144,6 @@ When `scrollThreshold` is set to 1, the virtual dropdown list will hold the reco
 | `dropdownUnorderedListClass`  | `No` | Adds class to `ul` of dropdown list. |
 | `dropdownListClass`           | `No` | Adds class to each `li` items|
 | `noResultClass`               | `No` | Adds class to separate `li` item to show no result message. |
-| `disableListClass`            | `No` | Adds class to each `li` items. Depends on `disableListFn` function or `disableProperty`  |
 | `inputLabelClass`             | `No` | Adds class to `<label>` field |
 | `inputLabelContainerClass`    | `No` | Adds class to surrounding `div` of input label.|
 | `customSpinnerClass`          | `No` | Adds class to `span` to show customized spinner.|
@@ -177,7 +176,6 @@ customClassType: CustomClassType = {
 | `listContainerStyle`      | `No` | Adds style to `div` that surrounds `ul` of dropdown list. |
 | `dropdownUnorderedListStyle`      | `No` | Adds style to `ul` of dropdown list. |
 | `dropdownListStyle`      | `No` | Adds style to each `li` items|
-| `disableListStyle`      | `No` | Adds style to each `li` items. Alternatively `dropdownListStyle` can also be used for custom style.|
 | `noResultStyle`      | `No` | Adds style to separate `li` item to show no result message. |
 | `inputLabelStyle`      | `No` | Adds style to `<label>` field |
 | `inputLabelContainerStyle`    | `No` | Adds style to surrounding `div` of input label.|
