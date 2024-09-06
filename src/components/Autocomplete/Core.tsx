@@ -139,10 +139,17 @@ function Core(props: InputFieldType) {
         }
     }
 
-    const onSearch = (_event: any) => {
+    const onSearch = async (_event: any) => {
         if (!searchValue.current?.value || searchValue.current?.value.trim() === '') {
             setFilteredData(props.dropdownData)
             return;
+        }
+        if (props.searchFn && typeof props.searchFn === 'function') {
+            const result = await props.searchFn(searchValue.current.value, props.dropdownData);
+            if (result && result.length > 0) {
+                setFilteredData(result);
+                return;
+            }
         }
         if (props.objectProperty) {
             const getSearchData = props.dropdownData.filter(dt => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
@@ -169,7 +176,7 @@ function Core(props: InputFieldType) {
                 return;
             }
             loadNextSetData();
-        } else if (event.target.scrollTop < 10 && filteredData.length > initialVisibleData) {
+        } else if (isScrollThresholdRequired && event.target.scrollTop < 10 && filteredData.length > initialVisibleData) {
             initData();
         }
     }
