@@ -1,3 +1,3 @@
 import { CustomAriaType, CustomClassType, CustomStyleType } from './types';
 
-export { CustomAriaType, CustomClassType, CustomStyleType }
+export { type CustomAriaType, type CustomClassType, type CustomStyleType }
