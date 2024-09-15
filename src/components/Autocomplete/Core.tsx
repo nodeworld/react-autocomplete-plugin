@@ -141,7 +141,7 @@ function Core(props: InputFieldType) {
 
     const onSearch = async (_event: any) => {
         if (!searchValue.current?.value || searchValue.current?.value.trim() === '') {
-            setFilteredData(props.dropdownData);
+            initData();
             unOrderedList.current?.scrollTo(0, 0);
             return;
         }
