@@ -141,7 +141,8 @@ function Core(props: InputFieldType) {
 
     const onSearch = async (_event: any) => {
         if (!searchValue.current?.value || searchValue.current?.value.trim() === '') {
-            setFilteredData(props.dropdownData)
+            initData();
+            unOrderedList.current?.scrollTo(0, 0);
             return;
         }
         if (props.searchFn && typeof props.searchFn === 'function') {
@@ -230,14 +231,28 @@ function Core(props: InputFieldType) {
                 temp.splice(0, initialVisibleData);
                 getNextDataSet = props.dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
                 if (getNextDataSet.length > 0) {
-                    setFilteredData([...temp, ...getNextDataSet]);
                     scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
+                    if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
+                        if (props.objectProperty) {
+                            getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                        } else {
+                            getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                        }
+                    }
+                    setFilteredData([...temp, ...getNextDataSet]);
                 }
             } else {
                 getNextDataSet = props.dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
                 if (getNextDataSet.length > 0) {
-                    setFilteredData((prevData) => [...prevData, ...getNextDataSet]);
                     scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
+                    if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
+                        if (props.objectProperty) {
+                            getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
+                        } else {
+                            getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
+                        }
+                    }
+                    setFilteredData((prevData) => [...prevData, ...getNextDataSet]);
                 }
             }
             setTimeout(() => {
@@ -246,17 +261,24 @@ function Core(props: InputFieldType) {
         }
     }
 
-    const setData = useCallback((dropDownData: any[]) => {
+    const setData = useCallback((dropDownData: any[], defaultValue: any, objectProperty: string | undefined) => {
         const data = [...dropDownData];
         if (data.length <= initialVisibleData) {
             setFilteredData(data);
             scrollDownIndex.current = data.length;
             return;
         }
-        const getFirstSetData = data.slice(0, initialVisibleData);
+        let getFirstSetData = data.slice(0, initialVisibleData);
+        scrollDownIndex.current = getFirstSetData.length;
+        if (defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
+            if (objectProperty) {
+                getFirstSetData = getFirstSetData.filter(dt => dt[objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
+            } else {
+                getFirstSetData = getFirstSetData.filter(dt => dt?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
+            }
+        }
         setFilteredData(getFirstSetData);
         setDataLength(data.length);
-        scrollDownIndex.current = getFirstSetData.length;
         return;
     }, [initialVisibleData]);
 
@@ -270,14 +292,28 @@ function Core(props: InputFieldType) {
                 temp.splice(0, initialVisibleData);
                 getNextDataSet = dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
                 if (getNextDataSet.length > 0) {
-                    setFilteredData([...temp, ...getNextDataSet]);
                     scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
+                    if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
+                        if (props.objectProperty) {
+                            getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                        } else {
+                            getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                        }
+                    }
+                    setFilteredData([...temp, ...getNextDataSet]);
                 }
             } else {
                 getNextDataSet = dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
                 if (getNextDataSet.length > 0) {
-                    setFilteredData((prevData) => [...prevData, ...getNextDataSet]);
                     scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
+                    if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
+                        if (props.objectProperty) {
+                            getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                        } else {
+                            getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                        }
+                    }
+                    setFilteredData((prevData) => [...prevData, ...getNextDataSet]);
                 }
             }
             setTimeout(() => {
@@ -322,7 +358,7 @@ function Core(props: InputFieldType) {
             }
         }
         if(props.dropdownData.length > 0) {
-            setData(props.dropdownData);
+            setData(props.dropdownData, props.defaultValue, props.objectProperty);
         }
     }, [props.dropdownData, setData, props.defaultValue, props.objectProperty, isEventEmitted, dataLength]);
 
