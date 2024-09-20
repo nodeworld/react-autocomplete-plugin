@@ -3,13 +3,14 @@
 
 A simple, powerful, lightweight and customizable autocomplete tool programmed for React projects!
 
-## Recommended React version 
+# Requirements
 
 React 16.8+, 17, 18 or higher
 
 ## Package information
 
 - Lightweight module with complete customization
+- Supports both JSX and TSX webapp projects
 - No 3rd party package installed in this module
 - Supports lazy loading and large dataset
 - Advanced and customizable scroll functionality
@@ -37,7 +38,7 @@ or
 
 react-autocomplete-plugin has solid test cases to make sure components executes without any issues.
 
-To run tests, run the following command
+To run tests, clone the repository, install the packages and run the following command. If you are facing any issues, you may need to check your node version (may require v18+) when running this package as a standlone module in local system.
 
 ```bash
   npm run test
@@ -82,6 +83,9 @@ To run tests, run the following command
 
 import Autocomplete Module into your component.
 
+```js
+import { Autocomplete } from 'react-autocomplete-plugin';
+```
 In your HTML template
 
 For dropdown string array,Eg: ["Apple", "Banana", "Kiwi"], do as below.
@@ -134,7 +138,13 @@ When `scrollThreshold` is set to 1, the virtual dropdown list will hold the reco
 
 ## Adding Custom CSS Class to autocomplete
 
+Please note that, if you are using JSX template, you may not be able to import the type CustomClassType. However you can refer this documentation and pass the custom classes without importing type.
+
 #### Import CustomClassType from the module (Optional).
+
+```js
+import { CustomClassType } from 'react-autocomplete-plugin';
+```
 
 | CustomClassTypes              | Required    | Description |
 | :--------                     | :-----------| :-----------|
@@ -166,8 +176,13 @@ customClassType: CustomClassType = {
 
 ## Adding Custom CSS styles to autocomplete
 
+Please note that, if you are using JSX template, you may not be able to import the type CustomStyleType. However you can refer this documentation and pass the custom styles without importing type.
+
 #### Import CustomStyleType from the module (Optional).
 
+```js
+import { CustomStyleType } from 'react-autocomplete-plugin';
+```
 
 | CustomStyleTypes | Required | Description |
 | :-------- | :-----------| :-----------|
@@ -196,9 +211,20 @@ customStyle: CustomStyleType = {
     customStyle="customStyle">
 </Autocomplete>
 ```
+
+For inspecting the classes or styles during develeopment, pass `inspectAutoCompleteList` as `true` so that the dropdown list will not close which will help to inspect the list. But don't forget to remove or make it `false` during production deployment
+
 ## Adding Accessible Rich Internet Applications (ARIA)
 
 #### ARIA provides easy access to the content for people with disabilities with help of screen reader.
+
+Please note that, if you are using JSX template, you may not be able to import the type CustomAriaType. However you can refer this documentation and pass the custom styles without importing type.
+
+#### Import CustomAriaType from the module (Optional).
+
+```js
+import { CustomAriaType } from 'react-autocomplete-plugin';
+```
 
 | Attributes | Required | Description |
 | :-------- | :-----------| :-----------|
@@ -238,6 +264,7 @@ customStyle: CustomStyleType = {
     - Execute `npm link` from `react-autocomplete-plugin` module
     - Go to the react application and execute `npm link react-autocomplete-plugin`, then start the app.
     - If the issue still persists, there are many forums that helps to resolve this issue.
+    - If nothing works, just copy the components folder and utils folder into your webapp and import the Autocomplete component.
     - Cheers 👋
 
 ## Github link
@@ -246,7 +273,7 @@ Github Link - [react-autocomplete-plugin](https://github.com/nodeworld/react-aut
 
 ## Roadmap
 
-Will deploy more features in future.
+Enhancements of the autocomplete plugin
 
 ## Support
 
