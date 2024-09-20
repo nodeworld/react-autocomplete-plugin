@@ -6,13 +6,15 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "start": "sh ./scripts/start.sh",
+    "tsc":"./node_modules/typescript/bin/tsc",
     "dev": "rollup -c --watch",
     "build": "rollup -c",
     "test": "jest --watchAll --verbose"
   },
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
-  "types": "./dist/esm/index.d.ts",
+  "types": "./dist/index.d.ts",
   "files": [
     "/dist"
   ],

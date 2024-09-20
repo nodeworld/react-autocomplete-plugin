@@ -8,24 +8,24 @@ import pkg from './package.json' assert { type: 'json' };
 import dts from 'rollup-plugin-dts';
 export default [
   {
-    input: "src/index.ts",
+    input: "build/index.js",
     output: [
       {
         file: pkg.main,
         format: "cjs",
-        sourcemap: true,
+        sourcemap: false,
       },
       {
         file: pkg.module,
-        format: "esm",
-        sourcemap: true,
+        format: "es",
+        sourcemap: false,
       },
     ],
     plugins: [
       peerDepsExternal(),
       resolve(),
       commonjs(),
-      typescript({ tsconfig: "./tsconfig.json" }),
+      typescript({ tsconfig: "./tsconfig.json", declaration: true, emitDeclarationOnly: true, exclude: ["**/__tests__", "**/*.test.tsx"] }),
       postcss({ extensions: ['.css'], inject: true, extract: false }),
       terser()
     ],

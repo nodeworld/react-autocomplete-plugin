@@ -7,12 +7,12 @@
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */,
     "jsx": "react-jsx", 
     "module": "ESNext",  
-    "declaration": true,
-    "declarationDir": "dist",
-    "sourceMap": true,
-    "outDir": "dist",
+    "sourceMap": false,
+    "outDir": "build",
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "emitDeclarationOnly": true,
-  }
+    "allowSyntheticDefaultImports": true
+  },
+  "exclude": [
+    "src/**/*.test.tsx"
+  ]
 }
