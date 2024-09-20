@@ -5,12 +5,12 @@ A simple, powerful, lightweight and customizable autocomplete tool programmed fo
 
 # Requirements
 
-React 16.8+, 17, 18 or higher
+React 16.8+, 17, 18 or higher which has `react hooks` support.
 
 ## Package information
 
 - Lightweight module with complete customization
-- Supports both JSX and TSX webapp projects
+- Supports both JS/JSX and TSX webapp projects
 - No 3rd party package installed in this module
 - Supports lazy loading and large dataset
 - Advanced and customizable scroll functionality
@@ -19,6 +19,10 @@ React 16.8+, 17, 18 or higher
 - Supports custom classes and custom css styles at various DOM levels
 - Ability to integrate 3rd party styling packages like bootstrap, tailwind or other CSS libraries.
 - Complete test case coverage.
+
+## Other information
+
+Adjust the width of the autocomplete list based on the project requirement. This module will inherit the width of parent container by default. But it can be customized as per the project need. It is very easy to control the UX design of this module with CSS, styles, bootstrap, tailwind and so on. Take the control of this module as per your requirement. Checkout below documenttaion for complete details.
 
 ## Installation
 
