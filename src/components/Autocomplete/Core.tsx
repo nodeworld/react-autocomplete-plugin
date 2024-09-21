@@ -69,13 +69,18 @@ function Core(props: InputFieldType) {
 
     const handleOnFocusEvent = (event: any) => {
         setisOnFocus(true);
+        const getListId = document.getElementById('autoCompleteListContainerId')?.style;
+        const getInputId = document.getElementById('searchInput')?.clientWidth;
+        if (getListId && getInputId) {
+            getListId.width = getInputId+'px';
+        }
         if (props.triggerOnFocusEvent && typeof props.triggerOnFocusEvent === 'function') {
             props.triggerOnFocusEvent(event)
         }
     }
 
     const onSelect = (selectedValue: any) => {
-        if (!selectedValue) { return; }
+        if (selectedValue === undefined || selectedValue === null) { return; }
         if (props.objectProperty) {
             searchValue.current!.value = selectedValue[props.objectProperty];
         } else {
@@ -381,12 +386,12 @@ function Core(props: InputFieldType) {
                 handleDropdownClick={handleDropdownClick}
                 showClearOption={props.showClearOption}
                 showdropDownArrow={props.showdropDownArrow} />
-            {
-                isOnFocus && <div
-                            className={assignClass('auto-complete-list', props?.customClass?.listContainerClass)}
-                            style={props?.customStyle?.listContainerStyle ? props.customStyle.listContainerStyle : {}}
-                            aria-label={props.aria?.ariaListContainer ? props.aria.ariaListContainer : 'Autocomplete list container.'}>
-                    <div id="list-container">
+                <div
+                    id="autoCompleteListContainerId"
+                    className={assignClass('auto-complete-list', props?.customClass?.listContainerClass)}
+                    style={props?.customStyle?.listContainerStyle ? props.customStyle.listContainerStyle : {}}
+                    aria-label={props.aria?.ariaListContainer ? props.aria.ariaListContainer : 'Autocomplete list container.'}>
+                    { isOnFocus && <div id="list-container">
                         <ul id="list-id"
                             ref={unOrderedList}
                             onScroll={listScrollEvent}
@@ -435,8 +440,8 @@ function Core(props: InputFieldType) {
                             }
                         </ul>
                     </div>
-                </div>
-            }
+                    }
+            </div>
         </React.Fragment>
     );
 }
