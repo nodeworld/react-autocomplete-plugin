@@ -48,6 +48,20 @@ To run tests, clone the repository, install the packages and run the following c
   npm run test
 ```
 
+## Demo & Examples
+
+| Demo Description | Stackblitz Example | 
+| :-------- | :-----------|
+| React Autocomplete Basic Example   | [ React Autocomplete basic - Stackblitz](https://stackblitz.com/edit/react-autocomplete-basic-example) |
+| React Autocomplete Basic with Dropdown as object      | [React Autocomplete -  Stackblitz](https://stackblitz.com/edit/react-autocomplete-dropdown-object-property) |
+| React Autocomplete With Huge Dataset    | [React Autocomplete with Large Dataset](https://stackblitz.com/edit/react-autocomplete-large-data-with-virtual-scroll)|
+| React Autocomplete With Bootstrap    | [React Autocomplete with bootstrap](https://stackblitz.com/edit/react-autocomplete-bootstrap)|
+| React Autocomplete With Tailwind    | [React Autocomplete with Tailwind](https://stackblitz.com/edit/react-autocomplete-tailwind)|
+| React Autocomplete Disabled Example    | [React Autocomplete Disabled Example](https://stackblitz.com/edit/react-autocomplete-disabled-v1)|
+| React Autocomplete With API Lazyload    | [React Autocomplete with API Lazyload](https://stackblitz.com/edit/react-autocomplete-api-call-lazy-load)|
+| React Autocomplete Disable list with a custom function    | [React Autocomplete Disable list with a custom function](https://stackblitz.com/edit/react-autocomplete-disabled-v2)|
+
+
 ## API Usage
 
 | Props | Type  | Required | Description |
@@ -72,8 +86,8 @@ To run tests, clone the repository, install the packages and run the following c
 |`showClearOption` |`boolean` |`No` | Shows clear option to allow user to clear the selected value. Default is `true`. |
 |`triggerOnFocusEvent`| `Function` |`No`|Triggers on-focus event when input field is focussed.`triggerOnFocusEvent` accepts a function as props. The function can have one event parameter (Eg: triggerOnFocusEvent(event)) and the parameter will be a focus event. By default, `triggerOnFocusEvent` will be undefined and will not be triggered until a function is assigned to it.|
 | `triggerBlurEvent`|`Function` |`No` | Triggers blur event when input field is out of focus. `triggerBlurEvent` accepts a function as props. The function can have one event parameter (Eg: triggerBlurEvent(event)) and the parameter will be a blur event. By default, `triggerBlurEvent` will be undefined and will not be triggered until function is assigned to it.|
-|`triggerApiLoadEvent` |`Function` |`No` | A custom function for lazy loading the dropdown data. `triggerApiLoadEvent` accepts a function as props. It triggers a custom function to call the API when the end of scroll is reached. Depends on `props.isApiLoad`. Pass `isApiLoad` as true if `triggerApiLoadEvent` function needs to be triggered. The custom function can have one parameter which would return an object with length of the dropdown data. This object can be used to calculate next paginated data, and using this param is optional. When lazy loading of the API is complete or all the dropdown data has been loaded, set `isApiLoad` as false, so that `triggerApiLoadEvent` will not be called. |
-| `isApiLoad` | `boolean` | `No` | Default value is false. This props is required if the dropdown data is being lazy-loaded. To trigger `triggerApiLoadEvent`, `isApiLoad` must be set to true. Once lazy loading or API calls are complete, set `isApiLoad` to false. |
+|`triggerApiLoadEvent` |`Function` |`No` | A custom function for lazy loading the dropdown data. `triggerApiLoadEvent` accepts a function as props. It triggers a custom function to call the API when the end of scroll is reached. Depends on `props.isApiLoad`. Pass `isApiLoad` as true if `triggerApiLoadEvent` function needs to be triggered. The custom function can have one parameter which would return an object with length of the dropdown data. This object can be used to calculate next paginated data, and using this param is optional. When lazy loading of the API is complete or all the dropdown data has been loaded, set `isApiLoad` as false, so that `triggerApiLoadEvent` will not be called. Alternatively instead of setting `isApiLoad` to `false`, you can also set `totalRecords`, so that the module does not trigger `triggerApiLoadEvent` event further|
+| `isApiLoad` | `boolean` | `No` | Default value is false. This props is required if the dropdown data is being lazy-loaded. To trigger `triggerApiLoadEvent`, `isApiLoad` must be set to true. Once lazy loading or API calls are complete, set `isApiLoad` to false or set the total records so that the module does not trigger the lazy-load calls further. |
 |`triggerClearSelectionEvent` |`Function` |`No` | Triggers custom function `triggerClearSelectionEvent(event)` input field is cleared.  |
 |`isScrollThresholdRequired`|`boolean`|`No` | Default is true. If scrollData and scrollThreshold is performance calculation is not required, set it to false. See below for more information.|
 |`inspectAutoCompleteList`|`boolean`|`No`|Default value is false. When set to true, it will not allow hiding the dropdown list on blur. This is helpful to inspect the dropdown list in dom and is recommended only for development.|
@@ -278,6 +292,10 @@ Github Link - [react-autocomplete-plugin](https://github.com/nodeworld/react-aut
 ## Roadmap
 
 Enhancements of the autocomplete plugin
+
+## Other plugins
+
+Checkout similar Autocomplete plugin in Angular Framework [ng-autocomplete-plugin](https://www.npmjs.com/package/ng-autocomplete-plugin) with same features
 
 ## Support
 

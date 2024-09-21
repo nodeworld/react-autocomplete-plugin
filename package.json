@@ -80,5 +80,17 @@
   "homepage": "https://github.com/nodeworld/react-autocomplete-plugin#readme",
   "sponsor": {
     "url": "https://buymeacoffee.com/nodeworld"
-  }
+  },
+  "keywords": [
+    "Autocomplete",
+    "Auto complete",
+    "React autocomplete",
+    "Autosearch",
+    "Auto search",
+    "Autosuggest",
+    "Auto suggest",
+    "React autosuggest",
+    "React autosearch",
+    "React Autocomplete dropdown"
+  ]
 }
