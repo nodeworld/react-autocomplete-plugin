@@ -57,6 +57,8 @@ function Core(props: InputFieldType) {
 
     const [filteredData, setFilteredData] = useState<any[]>([]);
 
+    const [searchedData, setSearchedData] = useState<any[]>([]);
+
     const noSearchResultMessage = props.noSearchResultMessage ? props.noSearchResultMessage : 'No results found.';
 
     const initialVisibleData = props.initialVisibleData ? props.initialVisibleData : 1000;
@@ -65,7 +67,10 @@ function Core(props: InputFieldType) {
 
     const [isEventEmitted, setIsEventEmitted] = useState<boolean>(false);
 
-    const [dataLength, setDataLength] = useState<number>(0); 
+    /* This state is to monitor the dropdown length so that useEffect does not re-render */
+    const [dropdownDataLength, setDropdownDataLength] = useState<number>(0);
+
+    const [isInputFieldDirty, setInputFieldDirty] = useState<boolean>(false);
 
     const handleOnFocusEvent = (event: any) => {
         setisOnFocus(true);
@@ -77,6 +82,13 @@ function Core(props: InputFieldType) {
         if (props.triggerOnFocusEvent && typeof props.triggerOnFocusEvent === 'function') {
             props.triggerOnFocusEvent(event)
         }
+        if (filteredData.length <= 0) {
+            if (isInputFieldDirty && searchValue.current?.value && searchValue.current.value !== '') {
+                onSearch(null);
+            } else {
+                setData(props.dropdownData, props.defaultValue, props.objectProperty);
+            }
+        }
     }
 
     const onSelect = (selectedValue: any) => {
@@ -87,22 +99,13 @@ function Core(props: InputFieldType) {
             searchValue.current!.value = selectedValue;
         }
         setisOnFocus(false);
+        setInputFieldDirty(false);
+        setFilteredData([]);
+        setSearchedData([]);
         if (props.broadcastSelectedValue) {
             props.broadcastSelectedValue(selectedValue);
         }
     }
-
-    // TODO: customSearch not being used anywhere. Check if it should be used.
-
-    /* const customSearch = async (event: any) => {
-        try {
-          if (!props.searchFn || props.searchFn.constructor !== Function) { throw new Error("Custom search should be a function."); }
-          const getData = await props.searchFn(event);
-          setFilteredData(getData);
-        } catch (err) {
-          console.log(err);
-        }
-      } */
 
     const handleOnBlurEvent = (event: any) => {
         if (props.inspectAutoCompleteList) { return; }
@@ -110,9 +113,7 @@ function Core(props: InputFieldType) {
             return;
         }
         if ((event?.relatedTarget as HTMLElement)?.classList?.contains('unorder-list')) {
-            if(!searchValue.current?.value) {
-                searchValue.current?.focus();
-            }
+            searchValue.current?.focus();
             return;
         }
         if ((event?.relatedTarget as HTMLElement)?.classList?.contains('autocomplete-data-list')) {
@@ -123,6 +124,7 @@ function Core(props: InputFieldType) {
             return;
         }
         setisOnFocus(false);
+        setFilteredData([]);
         if (props.triggerBlurEvent && typeof props.triggerBlurEvent === 'function') {
             props.triggerBlurEvent(event)
         }
@@ -146,21 +148,45 @@ function Core(props: InputFieldType) {
 
     const onSearch = async (_event: any) => {
         if (!searchValue.current?.value || searchValue.current?.value.trim() === '') {
+            setSearchedData([]);
             initData();
             unOrderedList.current?.scrollTo(0, 0);
             return;
         }
+        if (!isInputFieldDirty) {
+            setInputFieldDirty(true);
+        }
+        scrollDownIndex.current = 0; //reset
         if (props.searchFn && typeof props.searchFn === 'function') {
             const result = await props.searchFn(searchValue.current.value, props.dropdownData);
             if (result && result.length > 0) {
-                setFilteredData(result);
+                setSearchedData(result);
+                const getFirstSetData = result.slice(0, initialVisibleData);
+                scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
+                setFilteredData(getFirstSetData);
                 return;
             }
         }
         if (props.objectProperty) {
             const getSearchData = props.dropdownData.filter(dt => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
             if (getSearchData.length > 0) {
-                setFilteredData(getSearchData);
+                const getFirstSetData = getSearchData.slice(0, initialVisibleData);
+                scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
+                setSearchedData(getSearchData);
+                setFilteredData(getFirstSetData);
+                if (getFirstSetData.length < initialVisibleData) {
+                    if (!isEventEmitted && props.isApiLoad && props.triggerApiLoadEvent && typeof props.triggerApiLoadEvent === 'function') {
+                        props.triggerApiLoadEvent({ dataIndex: props.dropdownData.length });
+                        setIsEventEmitted(true);
+                        if (props.showLoadingSpinner) {
+                            setShowSpinner(true);
+                            setTimeout(() => {
+                                unOrderedList.current?.scrollTo(0, unOrderedList.current.scrollHeight + 10);
+                            }, 150)
+                            
+                        }
+                    }
+                }
                 return;
             }
             setFilteredData([]);
@@ -168,7 +194,23 @@ function Core(props: InputFieldType) {
         }
         const getSearchData = props.dropdownData.filter(dt => dt?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
         if (getSearchData.length > 0) {
-            setFilteredData(getSearchData);
+            const getFirstSetData = getSearchData.slice(0, initialVisibleData);
+            scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
+            setSearchedData(getSearchData);
+            setFilteredData(getFirstSetData);
+            if (getFirstSetData.length < initialVisibleData) {
+                if (!isEventEmitted && props.isApiLoad && props.triggerApiLoadEvent && typeof props.triggerApiLoadEvent === 'function') {
+                    props.triggerApiLoadEvent({ dataIndex: props.dropdownData.length });
+                    setIsEventEmitted(true);
+                    if (props.showLoadingSpinner) {
+                        setShowSpinner(true);
+                        setTimeout(() => {
+                            unOrderedList.current?.scrollTo(0, unOrderedList.current.scrollHeight + 10);
+                        }, 150)
+                        
+                    }
+                }
+            }
             return;
         }
         setFilteredData([]);
@@ -188,23 +230,16 @@ function Core(props: InputFieldType) {
     }
 
     const initData = () => {
-        const data = searchValue.current?.value && filteredData.length > 0 ? filteredData : props.dropdownData;
-        if (data.length <= 0) { return; }
-        const dt = data.slice(0, initialVisibleData);
-        setFilteredData(dt);
-        scrollDownIndex.current = initialVisibleData;
+        const data = isInputFieldDirty && searchedData.length > 0 && searchValue.current?.value ? searchedData.slice(0, initialVisibleData) : props.dropdownData.slice(0, initialVisibleData);
+        setFilteredData(data);
+        scrollDownIndex.current = data.length;
+        return;
+        
     }
 
     const loadNextSetData = () => {
         try {
             if (!isOnFocus) { return; }
-            // if (props.dropdownData.length <= initialVisibleData) {
-            //     if (props.triggerApiLoadEvent) {
-            //         setShowSpinner(true);
-            //         props.triggerApiLoadEvent({ dataIndex: props.dropdownData.length });
-            //     }
-            //     return;
-            // }
             setTimeout(() => {
                 nextSet();
             }, 150)
@@ -214,7 +249,8 @@ function Core(props: InputFieldType) {
     }
 
     const nextSet = () => {
-        if(props.dropdownData.length === scrollDownIndex.current) {
+        const dropdownData = searchedData.length > 0 ? [...searchedData] : [...props.dropdownData];
+        if(props.dropdownData.length === scrollDownIndex.current || searchedData.length === scrollDownIndex.current) {
             if (!isEventEmitted && props.isApiLoad && props.triggerApiLoadEvent && typeof props.triggerApiLoadEvent === 'function') {
                 props.triggerApiLoadEvent({ dataIndex: props.dropdownData.length });
                 setIsEventEmitted(true);
@@ -228,16 +264,16 @@ function Core(props: InputFieldType) {
             }
             return;
         }
-        if(props.dropdownData.length > filteredData.length) {
+        if(dropdownData.length > filteredData.length) {
             const getThresholdData = Math.ceil(filteredData.length / scrollThreshold);
             let getNextDataSet: any;
             if (isScrollThresholdRequired && getThresholdData >= initialVisibleData) {
                 const temp = [...filteredData];
                 temp.splice(0, initialVisibleData);
-                getNextDataSet = props.dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
+                getNextDataSet = dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
                 if (getNextDataSet.length > 0) {
                     scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
-                    if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
+                    if (isInputFieldDirty && (searchValue.current?.value && searchValue.current!.value !== '')) {
                         if (props.objectProperty) {
                             getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
                         } else {
@@ -247,10 +283,10 @@ function Core(props: InputFieldType) {
                     setFilteredData([...temp, ...getNextDataSet]);
                 }
             } else {
-                getNextDataSet = props.dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
+                getNextDataSet = dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
                 if (getNextDataSet.length > 0) {
                     scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
-                    if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
+                    if (isInputFieldDirty && (searchValue.current?.value && searchValue.current!.value !== '')) {
                         if (props.objectProperty) {
                             getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
                         } else {
@@ -275,7 +311,7 @@ function Core(props: InputFieldType) {
         }
         let getFirstSetData = data.slice(0, initialVisibleData);
         scrollDownIndex.current = getFirstSetData.length;
-        if (defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
+        if (isInputFieldDirty && (searchValue.current?.value && searchValue.current!.value !== '')) {
             if (objectProperty) {
                 getFirstSetData = getFirstSetData.filter(dt => dt[objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
             } else {
@@ -283,12 +319,51 @@ function Core(props: InputFieldType) {
             }
         }
         setFilteredData(getFirstSetData);
-        setDataLength(data.length);
+        setDropdownDataLength(data.length);
         return;
-    }, [initialVisibleData]);
+    }, [initialVisibleData, isInputFieldDirty]);
 
     const loadNextApiSet = useCallback((dropdownData: any) => {
         if (!isEventEmitted) { return; }
+        if (searchValue.current?.value && searchValue.current.value !== '') {
+            let getSearchData;
+            if (props.objectProperty) {
+                getSearchData = dropdownData.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
+            } else {
+                getSearchData = dropdownData.filter((dt: any) => dt?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
+            }
+            if (getSearchData && getSearchData.length > 0) {
+                if (isInputFieldDirty) {
+                    setSearchedData(getSearchData);
+                }
+                const getSlicedData = getSearchData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
+                if (getSlicedData && getSlicedData.length > 0) {
+                    scrollDownIndex.current = scrollDownIndex.current + getSlicedData.length;
+                    const getThresholdData = Math.ceil(filteredData.length / scrollThreshold);
+                    if (isScrollThresholdRequired && getThresholdData >= initialVisibleData) {
+                        const temp = [...filteredData];
+                        temp.splice(0, initialVisibleData);
+                        setFilteredData([...temp, ...getSlicedData]);
+                    } else {
+                        setFilteredData((prevData) => [...prevData, ...getSlicedData]);
+                    }
+                }
+                setTimeout(() => {
+                    unOrderedList.current?.scrollTo(0, Math.ceil((unOrderedList.current!.scrollHeight * 50) / 100));
+                    setIsEventEmitted(false);
+                    setDropdownDataLength(dropdownData.length);
+                    setShowSpinner(false);
+                }, 100);
+            } else {
+                setIsEventEmitted(false);
+                setDropdownDataLength(dropdownData.length);
+                setShowSpinner(false);
+                setSearchedData([]);
+                setFilteredData([])
+            }
+            return;
+        }
+
         if(dropdownData.length > filteredData.length) {
             const getThresholdData = Math.ceil(filteredData.length / scrollThreshold);
             let getNextDataSet: any;
@@ -324,21 +399,21 @@ function Core(props: InputFieldType) {
             setTimeout(() => {
                 unOrderedList.current?.scrollTo(0, Math.ceil((unOrderedList.current!.scrollHeight * 50) / 100));
                 setIsEventEmitted(false);
-                setDataLength(dropdownData.length);
+                setDropdownDataLength(dropdownData.length);
                 setShowSpinner(false);
             }, 100);
         }
-    }, [filteredData, initialVisibleData, isScrollThresholdRequired, scrollThreshold, isEventEmitted])
+    }, [filteredData, initialVisibleData, isScrollThresholdRequired, scrollThreshold, isEventEmitted, props.objectProperty, props.defaultValue, isInputFieldDirty])
 
     useEffect(() => {
-        if (isEventEmitted && dataLength !== props.dropdownData.length && typeof props.triggerApiLoadEvent === 'function') {
+        if (isEventEmitted && dropdownDataLength !== props.dropdownData.length && typeof props.triggerApiLoadEvent === 'function') {
             loadNextApiSet(props.dropdownData)
             return;
         }
-    }, [dataLength, isEventEmitted, props.triggerApiLoadEvent, loadNextApiSet, props.dropdownData])
+    }, [dropdownDataLength, isEventEmitted, props.triggerApiLoadEvent, loadNextApiSet, props.dropdownData])
 
     useEffect(() => {
-        if (isEventEmitted || dataLength > 0) { return; }
+        if (isEventEmitted || dropdownDataLength > 0) { return; }
         if (props.defaultValue) {
             if (props.objectProperty) {
                 let getValue;
@@ -362,10 +437,7 @@ function Core(props: InputFieldType) {
                 }
             }
         }
-        if(props.dropdownData.length > 0) {
-            setData(props.dropdownData, props.defaultValue, props.objectProperty);
-        }
-    }, [props.dropdownData, setData, props.defaultValue, props.objectProperty, isEventEmitted, dataLength]);
+    }, [props.dropdownData, setData, props.defaultValue, props.objectProperty, isEventEmitted, dropdownDataLength]);
 
     return (
         <React.Fragment>
@@ -431,7 +503,7 @@ function Core(props: InputFieldType) {
                                 </li>
                             }
                             {
-                                filteredData.length <= 0 && <li
+                                !showSpinner && filteredData.length <= 0 && <li
                                     className={assignClass('autocomplete-data-list noSearchResult', props?.customClass?.noResultClass)}
                                     style={props?.customStyle?.noResultStyle ? props.customStyle.noResultStyle : {}}
                                     aria-label={props.aria?.ariaNoSearchResult ? props.aria.ariaNoSearchResult : 'No search result.'}>
