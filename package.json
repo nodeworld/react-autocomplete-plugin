@@ -1,6 +1,6 @@
 {
   "name": "react-autocomplete-plugin",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "author": "nodeworld",
   "description": "A simple, powerful, lightweight and customizable autocomplete tool programmed for React projects!",
   "license": "MIT",
@@ -91,6 +91,7 @@
     "Auto suggest",
     "React autosuggest",
     "React autosearch",
-    "React Autocomplete dropdown"
+    "React Autocomplete dropdown",
+    "typeahead"
   ]
 }

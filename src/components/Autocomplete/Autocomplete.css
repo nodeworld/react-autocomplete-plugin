@@ -118,3 +118,7 @@
   ::-ms-placeholder {
     text-transform: capitalize;
   }
+
+  #list-id {
+    scroll-behavior: smooth;
+  }
