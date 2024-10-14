@@ -20,9 +20,17 @@ React 16.8+, 17, 18 or higher which has `react hooks` support.
 - Ability to integrate 3rd party styling packages like bootstrap, tailwind or other CSS libraries.
 - Complete test case coverage.
 
+## Package version
+
+| Package version | Description | 
+| :-------- | :-----------|
+| `2.0.0`  | Recommended. Search algorithm has been updated for better search results. No change in types or schema. Upgrading from `1.0.1` to `2.0.0`is safe without any impact. |
+| 1.0.1   | Autocomplete search package |
+
+
 ## Other information
 
-Adjust the width of the autocomplete list based on the project requirement. This module will inherit the width of parent container by default. But it can be customized as per the project need. It is very easy to control the UX design of this module with CSS, styles, bootstrap, tailwind and so on. Take the control of this module as per your requirement. Checkout below documenttaion for complete details.
+ Adjust the width of the autocomplete list based on the project requirement. This module will inherit the width of parent container by default. But it can be customized as per the project need. It is very easy to control the UX design of this module with CSS, styles, bootstrap, tailwind and so on. Take the control of this module as per your requirement. Checkout below documenttaion for complete details.
 
 ## Installation
 
@@ -71,7 +79,6 @@ To run tests, clone the repository, install the packages and run the following c
 |`initialVisibleData`| `number` | `No` | `initialVisibleData` denotes the number of records that will be displayed in dropdown list. Default value is 1000. It can be customized as per project requirement or can be left untouched. |
 |`broadcastSelectedValue`|`Function` |**Yes** | Custom function to broadcast the selected value when dropdown value is selected from list. Accepts one parameter which will give the selected value. |
 | `placeHolder` | `string` | `No` | Custom placeholder for auto-complete input field. |
-| `scrollData` | `number`| `No` | 1000 by default. Displays 1000 records by default. Can be changed as per project convenience. |
 | `scrollThreshold` | `number` | `No` | 3 by default. Helps to boost performance. It controls the scroll data and removes top or botton records during user scroll based on the scrollThreshold & scrollData configured. Check below for more details. |
 |`defaultValue`| `string` or `object` | `No` | `defaultValue` pre-populates the value in input textfield by matching the value from dropdown data. It can be a simple value or simple json object. For simple json object, `objectProperty` value should be available. |
 |`totalRecords` | `number` | `No` | If total number of records is known, totalRecords can be provided which will avoid extra condtions that will be executed in the package.
@@ -81,7 +88,7 @@ To run tests, clone the repository, install the packages and run the following c
 |`noSearchResultMessage` |`string` |`No` | By default **No results found** message will be displayed when search result is 0  |
 |`isAutoCompleteDisabled` |`boolean` |`No` | By default value is false. If updated as true, the input fields gets disabled. |
 |`customClass` | `object` |`No` | Allows custom class styling at various dom levels. Check below for more information|
-|`customStyle` | `object` |`No` | Allows custom ng-style. Check below for more information |
+|`customStyle` | `object` |`No` | Allows custom css style. Check below for more information |
 |`showdropDownArrow` | `boolean` |`No` | Show or hide dropdown icon in autocomplete field. Default is `true`.  |
 |`showClearOption` |`boolean` |`No` | Shows clear option to allow user to clear the selected value. Default is `true`. |
 |`triggerOnFocusEvent`| `Function` |`No`|Triggers on-focus event when input field is focussed.`triggerOnFocusEvent` accepts a function as props. The function can have one event parameter (Eg: triggerOnFocusEvent(event)) and the parameter will be a focus event. By default, `triggerOnFocusEvent` will be undefined and will not be triggered until a function is assigned to it.|
@@ -255,7 +262,7 @@ import { CustomAriaType } from 'react-autocomplete-plugin';
 | `ariaInputLabel`      | `No` | Adds ARIA label to `label field`. |
 
 
-## Running the github code locally to test automcomplete module in local react-app.
+## Running the github code locally to test autocomplete module in local react-app.
 
 - Download the [react-autocomplete-plugin](https://github.com/nodeworld/react-autocomplete-plugin) code locally through github.
 
@@ -291,7 +298,7 @@ Github Link - [react-autocomplete-plugin](https://github.com/nodeworld/react-aut
 
 ## Roadmap
 
-Enhancements of the autocomplete plugin
+Multi select dropdown feature in Q4 2024 or Q1 2025.
 
 ## Other plugins
 

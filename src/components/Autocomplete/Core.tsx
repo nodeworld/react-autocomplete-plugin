@@ -73,6 +73,7 @@ function Core(props: InputFieldType) {
     const [isInputFieldDirty, setInputFieldDirty] = useState<boolean>(false);
 
     const handleOnFocusEvent = (event: any) => {
+        if (props.isAutoCompleteDisabled) { return; }
         setisOnFocus(true);
         const getListId = document.getElementById('autoCompleteListContainerId')?.style;
         const getInputId = document.getElementById('searchInput')?.clientWidth;
@@ -131,6 +132,7 @@ function Core(props: InputFieldType) {
     }
 
     const handleDropdownClick = (_event: any) => {
+        if (props.isAutoCompleteDisabled) { return; }
         if(!isOnFocus) {
             searchValue.current?.focus();
         } else {
@@ -140,6 +142,7 @@ function Core(props: InputFieldType) {
     }
 
     const clearSearch = (event: any) => {
+        if (props.isAutoCompleteDisabled) { return; }
         searchValue.current!.value = '';
         if (props.triggerClearSelectionEvent && typeof props.triggerClearSelectionEvent === 'function') {
             props.triggerClearSelectionEvent(event);
