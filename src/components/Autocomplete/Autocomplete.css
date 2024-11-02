@@ -55,7 +55,7 @@
     display: block;
   }
   
-  .loader {
+  .autocomplete-plugin-loader {
     width: 2rem;
     height: 2rem;
     border: 3px solid #D4D3D3;
@@ -119,6 +119,8 @@
     text-transform: capitalize;
   }
 
-  #list-id {
-    scroll-behavior: smooth;
+  .view-more {
+    cursor: pointer;
+    background-color: #f6f5f5;
+    letter-spacing: 0.5px;
   }
