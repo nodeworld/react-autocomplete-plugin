@@ -24,8 +24,15 @@ React 16.8+, 17, 18 or higher which has `react hooks` support.
 
 | Package version | Description | 
 | :-------- | :-----------|
-| `2.0.0`  | Recommended. Search algorithm has been updated for better search results. No change in types or schema. Upgrading from `1.0.1` to `2.0.0`is safe without any impact. |
+| `2.0.1` | Recommended. Added View More feature for lazy loading API calls. Upgrading from lower versions to `2.0.1` is safe without any configuration change |
+| `2.0.0`  | Search algorithm has been updated for better search results. No change in types or schema. Upgrading from `1.0.1` to `2.0.0`is safe without any impact. |
 | 1.0.1   | Autocomplete search package |
+
+## What's new in 2.0.0 ?
+
+- Added `View More` to List dropdown at the end of the list as an alternative to call API when reaching the end of scroll with configurable options.
+- Now the developers who consume this package can decide how they should trigger an API Call. Using `View More`, or triggering API Call when reaching end of scroll. Both can be configured as well. Refer below for more information.
+- Renamed the internal class `loader`  to `autocomplete-plugin-loader` as `loader` class is too common name and may collide with other libraries.
 
 
 ## Other information
@@ -68,6 +75,8 @@ To run tests, clone the repository, install the packages and run the following c
 | React Autocomplete Disabled Example    | [React Autocomplete Disabled Example](https://stackblitz.com/edit/react-autocomplete-disabled-v1)|
 | React Autocomplete With API Lazyload    | [React Autocomplete with API Lazyload](https://stackblitz.com/edit/react-autocomplete-api-call-lazy-load)|
 | React Autocomplete Disable list with a custom function    | [React Autocomplete Disable list with a custom function](https://stackblitz.com/edit/react-autocomplete-disabled-v2)|
+| React Autocomplete View More feature Example    | [React Autocomplete View More feature Example    ](https://stackblitz.com/edit/react-autocomplete-large-data-with-virtual-scroll-r5epsy)|
+
 
 
 ## API Usage
@@ -103,6 +112,9 @@ To run tests, clone the repository, install the packages and run the following c
 |`showLoadingSpinner` | `boolean`|`No` | Shows the spinner at the botton of the list if lazy loaded. Default is `false` |
 |`isCustomSpinner`|`boolean`|`No`|Set as `true` to set customize spinner during lazy load or paginated API calls. Set your own class properties in `customClass.customSpinnerClass`. `showLoadingSpinner` must be set to `true` to show the spinner.|
 |`aria`|`object`|`No`|Helps to set aria roles at various levels of DOM to provide Accessible Rich Internet Application. Check below for more details.|
+|`optViewMoreOnlyForApiCall`|`boolean`|`No`|Default is `false`. When set to `true`, API Call will not be executed on reaching the end of the scroll, instead `View More` button has to be clicked to call the API or any custom function.|
+|`showViewMore`|`boolean`|`No`|Default is `true`. `View More` List will be shown at the end of dropdown if user has configured lazy loading (`triggerApiLoadEvent` && `isApiLoad`). `View More` will appear only when API call is to be executed.|
+|`viewMoreText`|`string`|`No`|Default text is `View More`. It can be updated through `viewMoreText` as per requirement|
 
 # Using the module
 
@@ -182,6 +194,7 @@ import { CustomClassType } from 'react-autocomplete-plugin';
 | `inputLabelClass`             | `No` | Adds class to `<label>` field |
 | `inputLabelContainerClass`    | `No` | Adds class to surrounding `div` of input label.|
 | `customSpinnerClass`          | `No` | Adds class to `span` to show customized spinner.|
+| `viewMoreClass`               | `No` | Adds class to View More `li` item |
 
 ```ts
 customClassType: CustomClassType = {
@@ -220,6 +233,7 @@ import { CustomStyleType } from 'react-autocomplete-plugin';
 | `inputLabelStyle`      | `No` | Adds style to `<label>` field |
 | `inputLabelContainerStyle`    | `No` | Adds style to surrounding `div` of input label.|
 | `customSpinnerStyle`          | `No` | Adds style to `span` to style the customized spinner.|
+| `viewMoreStyle`      | `No` | Adds style to View More `li` item. |
 
 ```ts
 customStyle: CustomStyleType = {
@@ -260,7 +274,7 @@ import { CustomAriaType } from 'react-autocomplete-plugin';
 | `ariaULList`          | `No` | Adds ARIA label to `ul` list item |
 | `ariaListContainer`   | `No` | Adds ARIA label to list container `div`. |
 | `ariaInputLabel`      | `No` | Adds ARIA label to `label field`. |
-
+| `ariaViewMore`        | `No` | Adds ARIA label to `View More` li item. |
 
 ## Running the github code locally to test autocomplete module in local react-app.
 
@@ -298,7 +312,8 @@ Github Link - [react-autocomplete-plugin](https://github.com/nodeworld/react-aut
 
 ## Roadmap
 
-Multi select dropdown feature in Q4 2024 or Q1 2025.
+- Multi select dropdown feature in Q4 2024 or Q1 2025.
+- Extensive search - Ability to search entire object in the list
 
 ## Other plugins
 

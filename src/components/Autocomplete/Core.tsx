@@ -37,6 +37,9 @@ type InputFieldType = {
     triggerBlurEvent?: Function | undefined;
     triggerOnFocusEvent?: Function | undefined;
     searchFn?: any | undefined;
+    viewMoreText?: string;
+    showViewMore?: boolean;
+    optViewMoreOnlyForApiCall?: boolean;
 }
 
 function Core(props: InputFieldType) {
@@ -72,6 +75,12 @@ function Core(props: InputFieldType) {
 
     const [isInputFieldDirty, setInputFieldDirty] = useState<boolean>(false);
 
+    const [displayViewMoreButton, setDisplayViewMoreButton] = useState<boolean>(false);
+
+    const viewMoreText = props.viewMoreText ? props.viewMoreText : 'View More';
+
+    const showViewMore = (props.showViewMore !== undefined && props.showViewMore !== null) ? props.isScrollThresholdRequired : true;
+
     const handleOnFocusEvent = (event: any) => {
         if (props.isAutoCompleteDisabled) { return; }
         setisOnFocus(true);
@@ -103,13 +112,13 @@ function Core(props: InputFieldType) {
         setInputFieldDirty(false);
         setFilteredData([]);
         setSearchedData([]);
+        setDisplayViewMoreButton(false);
         if (props.broadcastSelectedValue) {
             props.broadcastSelectedValue(selectedValue);
         }
     }
 
     const handleOnBlurEvent = (event: any) => {
-        if (props.inspectAutoCompleteList) { return; }
         if ((event?.relatedTarget as HTMLElement)?.classList?.contains('arrow')) {
             return;
         }
@@ -150,80 +159,62 @@ function Core(props: InputFieldType) {
     }
 
     const onSearch = async (_event: any) => {
-        if (!searchValue.current?.value || searchValue.current?.value.trim() === '') {
-            setSearchedData([]);
-            initData();
-            unOrderedList.current?.scrollTo(0, 0);
-            return;
-        }
-        if (!isInputFieldDirty) {
-            setInputFieldDirty(true);
-        }
-        scrollDownIndex.current = 0; //reset
-        if (props.searchFn && typeof props.searchFn === 'function') {
-            const result = await props.searchFn(searchValue.current.value, props.dropdownData);
-            if (result && result.length > 0) {
-                setSearchedData(result);
-                const getFirstSetData = result.slice(0, initialVisibleData);
-                scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
-                setFilteredData(getFirstSetData);
+        try {
+            if (!searchValue.current?.value || searchValue.current?.value.trim() === '') {
+                setSearchedData([]);
+                initData();
+                unOrderedList.current?.scrollTo(0, 0);
                 return;
             }
-        }
-        if (props.objectProperty) {
-            const getSearchData = props.dropdownData.filter(dt => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
+            if (!isInputFieldDirty) {
+                setInputFieldDirty(true);
+            }
+            scrollDownIndex.current = 0; //reset
+            if (props.searchFn && typeof props.searchFn === 'function') {
+                const result = await props.searchFn(searchValue.current.value, props.dropdownData);
+                if (result && result.length > 0) {
+                    setSearchedData(result);
+                    const getFirstSetData = result.slice(0, initialVisibleData);
+                    scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
+                    setFilteredData(getFirstSetData);
+                    isDisplayViewButton();
+                    return;
+                }
+            }
+            if (props.objectProperty) {
+                const getSearchData = props.dropdownData.filter(dt => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
+                if (getSearchData.length > 0) {
+                    const getFirstSetData = getSearchData.slice(0, initialVisibleData);
+                    scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
+                    setSearchedData(getSearchData);
+                    setFilteredData(getFirstSetData);
+                    isDisplayViewButton();
+                    return;
+                }
+                setFilteredData([]);
+                return;
+            }
+            const getSearchData = props.dropdownData.filter(dt => dt?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
             if (getSearchData.length > 0) {
                 const getFirstSetData = getSearchData.slice(0, initialVisibleData);
                 scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
                 setSearchedData(getSearchData);
                 setFilteredData(getFirstSetData);
-                if (getFirstSetData.length < initialVisibleData) {
-                    if (!isEventEmitted && props.isApiLoad && props.triggerApiLoadEvent && typeof props.triggerApiLoadEvent === 'function') {
-                        props.triggerApiLoadEvent({ dataIndex: props.dropdownData.length });
-                        setIsEventEmitted(true);
-                        if (props.showLoadingSpinner) {
-                            setShowSpinner(true);
-                            setTimeout(() => {
-                                unOrderedList.current?.scrollTo(0, unOrderedList.current.scrollHeight + 10);
-                            }, 150)
-                            
-                        }
-                    }
-                }
+                isDisplayViewButton();
                 return;
             }
             setFilteredData([]);
             return;
+        } catch (err) {
+            console.log(err);
         }
-        const getSearchData = props.dropdownData.filter(dt => dt?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
-        if (getSearchData.length > 0) {
-            const getFirstSetData = getSearchData.slice(0, initialVisibleData);
-            scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
-            setSearchedData(getSearchData);
-            setFilteredData(getFirstSetData);
-            if (getFirstSetData.length < initialVisibleData) {
-                if (!isEventEmitted && props.isApiLoad && props.triggerApiLoadEvent && typeof props.triggerApiLoadEvent === 'function') {
-                    props.triggerApiLoadEvent({ dataIndex: props.dropdownData.length });
-                    setIsEventEmitted(true);
-                    if (props.showLoadingSpinner) {
-                        setShowSpinner(true);
-                        setTimeout(() => {
-                            unOrderedList.current?.scrollTo(0, unOrderedList.current.scrollHeight + 10);
-                        }, 150)
-                        
-                    }
-                }
-            }
-            return;
-        }
-        setFilteredData([]);
-        return;
     }
 
     const listScrollEvent = (event: BaseSyntheticEvent) => {
         if (filteredData.length <= 0) { return; }
         if (event.target.offsetHeight + event.target.scrollTop >= event.target.scrollHeight) {
             if (props.totalRecords && scrollDownIndex.current >= props.totalRecords) {
+                setDisplayViewMoreButton(false);
                 return;
             }
             loadNextSetData();
@@ -245,7 +236,7 @@ function Core(props: InputFieldType) {
             if (!isOnFocus) { return; }
             setTimeout(() => {
                 nextSet();
-            }, 150)
+            }, 50)
         } catch (err) {
             console.log(err);
         }
@@ -255,14 +246,20 @@ function Core(props: InputFieldType) {
         const dropdownData = searchedData.length > 0 ? [...searchedData] : [...props.dropdownData];
         if(props.dropdownData.length === scrollDownIndex.current || searchedData.length === scrollDownIndex.current) {
             if (!isEventEmitted && props.isApiLoad && props.triggerApiLoadEvent && typeof props.triggerApiLoadEvent === 'function') {
+                if (props.optViewMoreOnlyForApiCall) {
+                    setDisplayViewMoreButton(true);
+                    setTimeout(() => {
+                        unOrderedList.current?.scrollTo(0, unOrderedList.current.scrollHeight + 10);
+                    }, 75);
+                    return;
+                }
                 props.triggerApiLoadEvent({ dataIndex: props.dropdownData.length });
                 setIsEventEmitted(true);
                 if (props.showLoadingSpinner) {
                     setShowSpinner(true);
                     setTimeout(() => {
                         unOrderedList.current?.scrollTo(0, unOrderedList.current.scrollHeight + 10);
-                    }, 150)
-                    
+                    }, 75);
                 }
             }
             return;
@@ -301,54 +298,107 @@ function Core(props: InputFieldType) {
             }
             setTimeout(() => {
                 unOrderedList.current?.scrollTo(0, Math.ceil((unOrderedList.current!.scrollHeight * 50) / 100));
-            }, 100)
+            }, 75)
         }
     }
 
     const setData = useCallback((dropDownData: any[], defaultValue: any, objectProperty: string | undefined) => {
-        const data = [...dropDownData];
-        if (data.length <= initialVisibleData) {
-            setFilteredData(data);
-            scrollDownIndex.current = data.length;
-            return;
-        }
-        let getFirstSetData = data.slice(0, initialVisibleData);
-        scrollDownIndex.current = getFirstSetData.length;
-        if (isInputFieldDirty && (searchValue.current?.value && searchValue.current!.value !== '')) {
-            if (objectProperty) {
-                getFirstSetData = getFirstSetData.filter(dt => dt[objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
-            } else {
-                getFirstSetData = getFirstSetData.filter(dt => dt?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
+        try {
+            const data = [...dropDownData];
+            if (data.length <= initialVisibleData) {
+                setFilteredData(data);
+                scrollDownIndex.current = data.length;
+                return;
             }
+            let getFirstSetData = data.slice(0, initialVisibleData);
+            scrollDownIndex.current = getFirstSetData.length;
+            if (isInputFieldDirty && (searchValue.current?.value && searchValue.current!.value !== '')) {
+                if (objectProperty) {
+                    getFirstSetData = getFirstSetData.filter(dt => dt[objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
+                } else {
+                    getFirstSetData = getFirstSetData.filter(dt => dt?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
+                }
+            }
+            setFilteredData(getFirstSetData);
+            setDropdownDataLength(data.length);
+            return;
+        } catch (error) {
+            console.log(error);
         }
-        setFilteredData(getFirstSetData);
-        setDropdownDataLength(data.length);
-        return;
     }, [initialVisibleData, isInputFieldDirty]);
 
     const loadNextApiSet = useCallback((dropdownData: any) => {
-        if (!isEventEmitted) { return; }
-        if (searchValue.current?.value && searchValue.current.value !== '') {
-            let getSearchData;
-            if (props.objectProperty) {
-                getSearchData = dropdownData.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
-            } else {
-                getSearchData = dropdownData.filter((dt: any) => dt?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
-            }
-            if (getSearchData && getSearchData.length > 0) {
-                if (isInputFieldDirty) {
-                    setSearchedData(getSearchData);
+        try {
+            if (!isEventEmitted) { return; }
+            if (searchValue.current?.value && searchValue.current.value !== '') {
+                let getSearchData;
+                if (props.objectProperty) {
+                    getSearchData = dropdownData.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
+                } else {
+                    getSearchData = dropdownData.filter((dt: any) => dt?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
                 }
-                const getSlicedData = getSearchData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
-                if (getSlicedData && getSlicedData.length > 0) {
-                    scrollDownIndex.current = scrollDownIndex.current + getSlicedData.length;
-                    const getThresholdData = Math.ceil(filteredData.length / scrollThreshold);
-                    if (isScrollThresholdRequired && getThresholdData >= initialVisibleData) {
-                        const temp = [...filteredData];
-                        temp.splice(0, initialVisibleData);
-                        setFilteredData([...temp, ...getSlicedData]);
-                    } else {
-                        setFilteredData((prevData) => [...prevData, ...getSlicedData]);
+                if (getSearchData && getSearchData.length > 0) {
+                    if (isInputFieldDirty) {
+                        setSearchedData(getSearchData);
+                    }
+                    const getSlicedData = getSearchData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
+                    if (getSlicedData && getSlicedData.length > 0) {
+                        scrollDownIndex.current = scrollDownIndex.current + getSlicedData.length;
+                        const getThresholdData = Math.ceil(filteredData.length / scrollThreshold);
+                        if (isScrollThresholdRequired && getThresholdData >= initialVisibleData) {
+                            const temp = [...filteredData];
+                            temp.splice(0, initialVisibleData);
+                            setFilteredData([...temp, ...getSlicedData]);
+                        } else {
+                            setFilteredData((prevData) => [...prevData, ...getSlicedData]);
+                        }
+                    }
+                    setTimeout(() => {
+                        unOrderedList.current?.scrollTo(0, Math.ceil((unOrderedList.current!.scrollHeight * 50) / 100));
+                        setIsEventEmitted(false);
+                        setDropdownDataLength(dropdownData.length);
+                        setShowSpinner(false);
+                    }, 100);
+                } else {
+                    setIsEventEmitted(false);
+                    setDropdownDataLength(dropdownData.length);
+                    setShowSpinner(false);
+                    setSearchedData([]);
+                    setFilteredData([])
+                }
+                return;
+            }
+    
+            if(dropdownData.length > filteredData.length) {
+                const getThresholdData = Math.ceil(filteredData.length / scrollThreshold);
+                let getNextDataSet: any;
+                if (isScrollThresholdRequired && getThresholdData >= initialVisibleData) {
+                    const temp = [...filteredData];
+                    temp.splice(0, initialVisibleData);
+                    getNextDataSet = dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
+                    if (getNextDataSet.length > 0) {
+                        scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
+                        if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
+                            if (props.objectProperty) {
+                                getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                            } else {
+                                getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                            }
+                        }
+                        setFilteredData([...temp, ...getNextDataSet]);
+                    }
+                } else {
+                    getNextDataSet = dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
+                    if (getNextDataSet.length > 0) {
+                        scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
+                        if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
+                            if (props.objectProperty) {
+                                getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                            } else {
+                                getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                            }
+                        }
+                        setFilteredData((prevData) => [...prevData, ...getNextDataSet]);
                     }
                 }
                 setTimeout(() => {
@@ -357,56 +407,38 @@ function Core(props: InputFieldType) {
                     setDropdownDataLength(dropdownData.length);
                     setShowSpinner(false);
                 }, 100);
-            } else {
-                setIsEventEmitted(false);
-                setDropdownDataLength(dropdownData.length);
-                setShowSpinner(false);
-                setSearchedData([]);
-                setFilteredData([])
             }
-            return;
-        }
-
-        if(dropdownData.length > filteredData.length) {
-            const getThresholdData = Math.ceil(filteredData.length / scrollThreshold);
-            let getNextDataSet: any;
-            if (isScrollThresholdRequired && getThresholdData >= initialVisibleData) {
-                const temp = [...filteredData];
-                temp.splice(0, initialVisibleData);
-                getNextDataSet = dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
-                if (getNextDataSet.length > 0) {
-                    scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
-                    if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
-                        if (props.objectProperty) {
-                            getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
-                        } else {
-                            getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
-                        }
-                    }
-                    setFilteredData([...temp, ...getNextDataSet]);
-                }
-            } else {
-                getNextDataSet = dropdownData.slice(scrollDownIndex.current, scrollDownIndex.current + initialVisibleData);
-                if (getNextDataSet.length > 0) {
-                    scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
-                    if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
-                        if (props.objectProperty) {
-                            getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
-                        } else {
-                            getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
-                        }
-                    }
-                    setFilteredData((prevData) => [...prevData, ...getNextDataSet]);
-                }
-            }
-            setTimeout(() => {
-                unOrderedList.current?.scrollTo(0, Math.ceil((unOrderedList.current!.scrollHeight * 50) / 100));
-                setIsEventEmitted(false);
-                setDropdownDataLength(dropdownData.length);
-                setShowSpinner(false);
-            }, 100);
+        } catch (error) {
+            console.log(error);
         }
     }, [filteredData, initialVisibleData, isScrollThresholdRequired, scrollThreshold, isEventEmitted, props.objectProperty, props.defaultValue, isInputFieldDirty])
+
+    const onViewMore = (_event: any) => {
+        if (props.isApiLoad && !isEventEmitted && typeof props.triggerApiLoadEvent === 'function') {
+            props.triggerApiLoadEvent({ dataIndex: dropdownDataLength });
+            setIsEventEmitted(true);
+            if (props.showLoadingSpinner) {
+              setShowSpinner(true);
+            }
+          }
+    }
+
+  function isDisplayViewButton() {
+    if (typeof props.totalRecords !== 'undefined' && dropdownDataLength >= props.totalRecords) {
+      setDisplayViewMoreButton(false);
+      return;
+    }
+    if (searchValue.current?.value && searchValue.current.value !== '' && props.isApiLoad && !isEventEmitted) {
+      setDisplayViewMoreButton(true);
+      return;
+    }
+    if (scrollDownIndex.current >= dropdownDataLength) {
+      setDisplayViewMoreButton(true);
+      return;
+    }
+    setDisplayViewMoreButton(false);
+    return;
+  }
 
     useEffect(() => {
         if (isEventEmitted && dropdownDataLength !== props.dropdownData.length && typeof props.triggerApiLoadEvent === 'function') {
@@ -496,7 +528,7 @@ function Core(props: InputFieldType) {
                                 })
                             }
                             {
-                                showSpinner && props.showLoadingSpinner && !props.isCustomSpinner && <li className="auto-complete-list-spinner"><span className="loader"></span></li>
+                                showSpinner && props.showLoadingSpinner && !props.isCustomSpinner && <li className="auto-complete-list-spinner"><span className="autocomplete-plugin-loader"></span></li>
                             }
                             {
                                 showSpinner && props.showLoadingSpinner && props.isCustomSpinner && <li className="auto-complete-list-spinner">
@@ -511,6 +543,20 @@ function Core(props: InputFieldType) {
                                     style={props?.customStyle?.noResultStyle ? props.customStyle.noResultStyle : {}}
                                     aria-label={props.aria?.ariaNoSearchResult ? props.aria.ariaNoSearchResult : 'No search result.'}>
                                     {noSearchResultMessage}
+                                </li>
+                            }
+                            {
+                                showViewMore &&
+                                !isEventEmitted &&
+                                !showSpinner &&
+                                props.isApiLoad &&
+                                displayViewMoreButton &&
+                                <li className={assignClass('autocomplete-data-list view-more', props?.customClass?.viewMoreClass)}
+                                    style={props?.customStyle?.viewMoreStyle ? props.customStyle.viewMoreStyle : {}}
+                                    aria-label={props.aria?.ariaViewMore ? props.aria.ariaViewMore : 'View more results'}
+                                    tabIndex={0}
+                                    onClick={onViewMore}>
+                                    {viewMoreText}
                                 </li>
                             }
                         </ul>

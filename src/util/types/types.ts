@@ -8,8 +8,9 @@ export type CustomClassType = {
     inputLabelContainerClass?:string;
     inputLabelClass?: string;
     customSpinnerClass?: string;
-  }
-  
+    viewMoreClass?: string;
+}
+
 export type CustomStyleType = {
     parentContainerStyle?: React.CSSProperties;
     inputFieldStyle?: React.CSSProperties;
@@ -20,7 +21,8 @@ export type CustomStyleType = {
     inputLabelContainerStyle?: React.CSSProperties;
     inputLabelStyle?: React.CSSProperties;
     customSpinnerStyle?: React.CSSProperties;
-  }
+    viewMoreStyle?: React.CSSProperties;
+}
 
 export type CustomAriaType = {
   ariaRole?: string;
@@ -30,5 +32,5 @@ export type CustomAriaType = {
   ariaListContainer?: string;
   ariaInputField?: string;
   ariaInputLabel?: string;
+  ariaViewMore?: string;
 }
-  

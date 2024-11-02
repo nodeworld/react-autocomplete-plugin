@@ -34,6 +34,9 @@ export type AutoCompleteProps = {
     aria?: CustomAriaType;
     isApiLoad?: boolean;
     searchFn?: Function | undefined;
+    viewMoreText?: string;
+    showViewMore?: boolean;
+    optViewMoreOnlyForApiCall?: boolean;
 }
 
 function Autocomplete(props: AutoCompleteProps) {
@@ -109,6 +112,9 @@ function Autocomplete(props: AutoCompleteProps) {
                     triggerOnFocusEvent={props.triggerOnFocusEvent}
                     totalRecords={props.totalRecords}
                     searchFn={props.searchFn}
+                    optViewMoreOnlyForApiCall={props.optViewMoreOnlyForApiCall}
+                    showViewMore={props.showViewMore}
+                    viewMoreText={props.viewMoreText}
                     />
             {/* </div> */}
         </div>
