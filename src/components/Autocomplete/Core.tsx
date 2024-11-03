@@ -81,6 +81,9 @@ function Core(props: InputFieldType) {
 
     const showViewMore = (props.showViewMore !== undefined && props.showViewMore !== null) ? props.isScrollThresholdRequired : true;
 
+    const showLoadingSpinner = (props.showLoadingSpinner !== undefined && props.showLoadingSpinner !== null) ? props.showLoadingSpinner : true;
+
+
     const handleOnFocusEvent = (event: any) => {
         if (props.isAutoCompleteDisabled) { return; }
         setisOnFocus(true);
@@ -255,7 +258,7 @@ function Core(props: InputFieldType) {
                 }
                 props.triggerApiLoadEvent({ dataIndex: props.dropdownData.length });
                 setIsEventEmitted(true);
-                if (props.showLoadingSpinner) {
+                if (showLoadingSpinner) {
                     setShowSpinner(true);
                     setTimeout(() => {
                         unOrderedList.current?.scrollTo(0, unOrderedList.current.scrollHeight + 10);
@@ -417,7 +420,7 @@ function Core(props: InputFieldType) {
         if (props.isApiLoad && !isEventEmitted && typeof props.triggerApiLoadEvent === 'function') {
             props.triggerApiLoadEvent({ dataIndex: dropdownDataLength });
             setIsEventEmitted(true);
-            if (props.showLoadingSpinner) {
+            if (showLoadingSpinner) {
               setShowSpinner(true);
             }
           }
@@ -528,10 +531,10 @@ function Core(props: InputFieldType) {
                                 })
                             }
                             {
-                                showSpinner && props.showLoadingSpinner && !props.isCustomSpinner && <li className="auto-complete-list-spinner"><span className="autocomplete-plugin-loader"></span></li>
+                                showSpinner && showLoadingSpinner && !props.isCustomSpinner && <li className="auto-complete-list-spinner"><span className="autocomplete-plugin-loader"></span></li>
                             }
                             {
-                                showSpinner && props.showLoadingSpinner && props.isCustomSpinner && <li className="auto-complete-list-spinner">
+                                showSpinner && showLoadingSpinner && props.isCustomSpinner && <li className="auto-complete-list-spinner">
                                     <span
                                         className={props?.customClass?.customSpinnerClass ? props.customClass.customSpinnerClass : ''}
                                         style={props?.customStyle?.customSpinnerStyle ? props.customStyle.customSpinnerStyle : {}}></span>
