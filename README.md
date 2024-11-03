@@ -306,6 +306,11 @@ import { CustomAriaType } from 'react-autocomplete-plugin';
     - If nothing works, just copy the components folder and utils folder into your webapp and import the Autocomplete component.
     - Cheers 👋
 
+## Change Logs and version history
+
+Refer the change history by viewing this link - [CHANGELOG](https://github.com/nodeworld/react-autocomplete-plugin/blob/release/CHANGELOG.md)
+
+
 ## Github link
 
 Github Link - [react-autocomplete-plugin](https://github.com/nodeworld/react-autocomplete-plugin)
