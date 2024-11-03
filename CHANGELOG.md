@@ -8,6 +8,7 @@
 - Now the developers who consume this package can decide how they should trigger an API Call. Using `View More`, or triggering API Call when reaching end of scroll. Both can be configured as well. Refer below for more information.
 - Added input props - showViewMore, viewMoreText and optViewMoreOnlyForApiCall.
 - Renamed the internal class `loader`  to `autocomplete-plugin-loader` as `loader` class is too common name and may collide with other libraries.
+- By default `showLoadingSpinner` marked as `true` in `2.0.1` . Spinner will be shown by default, if lazy loading / API calls are configured. It can be passed as `false` through input props if not required.
 - Updated Readme file and stackblitz examples.
 - Upgrade to this package is recommended.
 

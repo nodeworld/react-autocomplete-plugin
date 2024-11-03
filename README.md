@@ -25,14 +25,15 @@ React 16.8+, 17, 18 or higher which has `react hooks` support.
 | Package version | Description | 
 | :-------- | :-----------|
 | `2.0.1` | Recommended. Added View More feature for lazy loading API calls. Upgrading from lower versions to `2.0.1` is safe without any configuration change |
-| `2.0.0`  | Search algorithm has been updated for better search results. No change in types or schema. Upgrading from `1.0.1` to `2.0.0`is safe without any impact. |
+| 2.0.0  | Search algorithm has been updated for better search results. No change in types or schema. Upgrading from `1.0.1` to `2.0.0`is safe without any impact. |
 | 1.0.1   | Autocomplete search package |
 
-## What's new in 2.0.0 ?
+## What's new in 2.0.1 ?
 
 - Added `View More` to List dropdown at the end of the list as an alternative to call API when reaching the end of scroll with configurable options.
 - Now the developers who consume this package can decide how they should trigger an API Call. Using `View More`, or triggering API Call when reaching end of scroll. Both can be configured as well. Refer below for more information.
 - Renamed the internal class `loader`  to `autocomplete-plugin-loader` as `loader` class is too common name and may collide with other libraries.
+- By default `showLoadingSpinner` marked as `true` in `2.0.1` . Spinner will be shown by default, if lazy loading / API calls are configured. It can be passed as `false` through input props if not required.
 
 
 ## Other information
