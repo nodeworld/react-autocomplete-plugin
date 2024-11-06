@@ -1,5 +1,14 @@
 # Module version changes and fixes.
 
+
+## 2.0.2
+
+`Users are safe to upgrade to 2.0.2 from any lower version without any module level changes.`
+
+- Fixed a non-impact bug related to View More Input props
+- Added resize listener to adjust the width of dropdownlist during resize events. Resize event listener will be destroyed once dropdown list is closed on select or onBlur.
+- Upgrade to this package is recommended for better interactivity.
+
 ## 2.0.1
 
 `Users are safe to upgrade to 2.0.1 from any lower version without any module level changes.`
@@ -10,7 +19,6 @@
 - Renamed the internal class `loader`  to `autocomplete-plugin-loader` as `loader` class is too common name and may collide with other libraries.
 - By default `showLoadingSpinner` marked as `true` in `2.0.1` . Spinner will be shown by default, if lazy loading / API calls are configured. It can be passed as `false` through input props if not required.
 - Updated Readme file and stackblitz examples.
-- Upgrade to this package is recommended.
 
 ## 2.0.0
 - Search algorithm has been updated for better search results. No change in types or schema. Upgrading from `1.0.1` to `2.0.0`is safe without any impact.

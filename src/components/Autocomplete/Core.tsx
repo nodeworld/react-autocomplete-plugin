@@ -79,14 +79,29 @@ function Core(props: InputFieldType) {
 
     const viewMoreText = props.viewMoreText ? props.viewMoreText : 'View More';
 
-    const showViewMore = (props.showViewMore !== undefined && props.showViewMore !== null) ? props.isScrollThresholdRequired : true;
+    const showViewMore = (props.showViewMore !== undefined && props.showViewMore !== null) ? props.showViewMore : true;
 
     const showLoadingSpinner = (props.showLoadingSpinner !== undefined && props.showLoadingSpinner !== null) ? props.showLoadingSpinner : true;
+
+    function setWidth() {
+        const getListId = document.getElementById('autoCompleteListContainerId')?.style;
+        const getInputId = document.getElementById('searchInput')?.clientWidth;
+        if (getListId && getInputId) {
+            getListId.width = getInputId+'px';
+        }
+        return;
+    }
+    
+    const resizeListener = useCallback(() => {
+        setWidth();
+    }, []);
 
 
     const handleOnFocusEvent = (event: any) => {
         if (props.isAutoCompleteDisabled) { return; }
         setisOnFocus(true);
+        setWidth();
+        window.addEventListener("resize", resizeListener);
         const getListId = document.getElementById('autoCompleteListContainerId')?.style;
         const getInputId = document.getElementById('searchInput')?.clientWidth;
         if (getListId && getInputId) {
@@ -112,6 +127,7 @@ function Core(props: InputFieldType) {
             searchValue.current!.value = selectedValue;
         }
         setisOnFocus(false);
+        window.removeEventListener("resize", resizeListener);
         setInputFieldDirty(false);
         setFilteredData([]);
         setSearchedData([]);
@@ -138,6 +154,7 @@ function Core(props: InputFieldType) {
         }
         setisOnFocus(false);
         setFilteredData([]);
+        window.removeEventListener("resize", resizeListener);
         if (props.triggerBlurEvent && typeof props.triggerBlurEvent === 'function') {
             props.triggerBlurEvent(event)
         }
