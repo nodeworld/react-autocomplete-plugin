@@ -83,11 +83,13 @@ function Core(props: InputFieldType) {
 
     const showLoadingSpinner = (props.showLoadingSpinner !== undefined && props.showLoadingSpinner !== null) ? props.showLoadingSpinner : true;
 
+    const listContainerRef = useRef<HTMLDivElement>(null);
+
     function setWidth() {
-        const getListId = document.getElementById('autoCompleteListContainerId')?.style;
-        const getInputId = document.getElementById('searchInput')?.clientWidth;
-        if (getListId && getInputId) {
-            getListId.width = getInputId+'px';
+        const listWidth = listContainerRef.current?.style;
+        const inputFieldWidth = searchValue.current?.clientWidth;
+        if (listWidth && inputFieldWidth) {
+            listWidth.width = inputFieldWidth+'px';
         }
         return;
     }
@@ -102,8 +104,8 @@ function Core(props: InputFieldType) {
         setisOnFocus(true);
         setWidth();
         window.addEventListener("resize", resizeListener);
-        const getListId = document.getElementById('autoCompleteListContainerId')?.style;
-        const getInputId = document.getElementById('searchInput')?.clientWidth;
+        const getListId = listContainerRef.current?.style;
+        const getInputId = searchValue.current?.clientWidth;
         if (getListId && getInputId) {
             getListId.width = getInputId+'px';
         }
@@ -461,11 +463,17 @@ function Core(props: InputFieldType) {
   }
 
     useEffect(() => {
+        if(!isOnFocus) { return; }
+        const listWidth = listContainerRef.current?.style;
+        const inputFieldWidth = searchValue.current?.clientWidth;
+        if (listWidth?.width !== inputFieldWidth + 'px') {
+            setWidth();
+        }
         if (isEventEmitted && dropdownDataLength !== props.dropdownData.length && typeof props.triggerApiLoadEvent === 'function') {
             loadNextApiSet(props.dropdownData)
             return;
         }
-    }, [dropdownDataLength, isEventEmitted, props.triggerApiLoadEvent, loadNextApiSet, props.dropdownData])
+    }, [dropdownDataLength, isEventEmitted, props.triggerApiLoadEvent, loadNextApiSet, props.dropdownData, isOnFocus])
 
     useEffect(() => {
         if (isEventEmitted || dropdownDataLength > 0) { return; }
@@ -515,6 +523,7 @@ function Core(props: InputFieldType) {
                 showdropDownArrow={props.showdropDownArrow} />
                 <div
                     id="autoCompleteListContainerId"
+                    ref={listContainerRef}
                     className={assignClass('auto-complete-list', props?.customClass?.listContainerClass)}
                     style={props?.customStyle?.listContainerStyle ? props.customStyle.listContainerStyle : {}}
                     aria-label={props.aria?.ariaListContainer ? props.aria.ariaListContainer : 'Autocomplete list container.'}>

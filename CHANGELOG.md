@@ -1,5 +1,11 @@
 # Module version changes and fixes.
 
+## 2.0.3
+
+`Users are safe to upgrade to 2.0.3 from any lower version without any module level changes.`
+- Fixed a minor bug related to width of the autocomplete dropdown list when using the module multiple times in the same component.
+- Removed native javascript reference to get width of the div and implemented useRef.
+- The module is healthy with this version and gives better interactivity.
 
 ## 2.0.2
 
