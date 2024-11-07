@@ -185,6 +185,7 @@ function Core(props: InputFieldType) {
             if (!searchValue.current?.value || searchValue.current?.value.trim() === '') {
                 setSearchedData([]);
                 initData();
+                isDisplayViewButton();
                 unOrderedList.current?.scrollTo(0, 0);
                 return;
             }
