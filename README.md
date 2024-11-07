@@ -24,7 +24,8 @@ React 16.8+, 17, 18 or higher which has `react hooks` support.
 
 | Package version | Description | 
 | :-------- | :-----------|
-| `2.0.2` | Recommended. Fixed a non-impact bug related to View More Input props. Added resize listener to adjust the width of dropdownlist during resize events. Resize event listener will be destroyed once dropdown list is closed on select or onBlur |
+| `2.0.3` | Removed native javascript reference to get width of the div and implemented useRef. Fixed a minor bug related to width of the autocomplete dropdown list when using the module multiple times in the same component |
+| `2.0.2` | Fixed a non-impact bug related to View More Input props. Added resize listener to adjust the width of dropdownlist during resize events. Resize event listener will be destroyed once dropdown list is closed on select or onBlur |
 | 2.0.1 | Added View More feature for lazy loading API calls. Upgrading from lower versions to `2.0.1` is safe without any configuration change |
 | 2.0.0  | Search algorithm has been updated for better search results. No change in types or schema. Upgrading from `1.0.1` to `2.0.0`is safe without any impact. |
 | 1.0.1   | Autocomplete search package |
