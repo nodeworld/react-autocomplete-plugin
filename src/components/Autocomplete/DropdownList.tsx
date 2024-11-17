@@ -37,11 +37,13 @@ function DropdownList(props: ListType, listRef: Ref<HTMLLIElement>) {
             <li
                 tabIndex={0}
                 ref={listRef}
+                id={"autocomplete-li-element-"+props.index}
                 className={`${applyClasses()}${((props.disableProperty && props.data[props.disableProperty]) || (props.disableListFn && props.disableListFn(props.index, props.data))) ? ' disable-list-element' : ''}`}
                 style={applyStyle()}
                 key={props.index}
                 onMouseDown={() => props.onSelect(props.data)}
-                aria-label={props.disableListFn ? (props.disableListFn(props.index, props.data) ? 'Autocomplete list disabled' : 'Autocomplete list') : (props.disableProperty) ? (props.data[props.disableProperty] === true ? 'Autocomplete list disabled' : 'Autocomplete list') : 'Autocomplete list'}>
+                aria-disabled={((props.disableProperty && props.data[props.disableProperty]) || (props.disableListFn && props.disableListFn(props.index, props.data))) ? true : false}
+                aria-label={props.objectProperty ? props.data[props.objectProperty] : props.data}>
                 {props.objectProperty ? props.data[props.objectProperty] : props.data}
             </li>
         </React.Fragment>
