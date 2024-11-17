@@ -123,9 +123,9 @@ function Core(props: InputFieldType) {
             if (isInputFieldDirty && searchValue.current?.value && searchValue.current.value !== '') {
                 onSearch(null);
             } 
-            // else {
-            //     setData(props.dropdownData, props.defaultValue, props.objectProperty);
-            // }
+            else {
+                setData(props.dropdownData, props.defaultValue, props.objectProperty);
+            }
         }
     }
 
