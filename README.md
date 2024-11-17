@@ -15,6 +15,7 @@ React 16.8+, 17, 18 or higher which has `react hooks` support.
 - Supports lazy loading and large dataset
 - Advanced and customizable scroll functionality
 - Supports custom events
+- Keyboard navigation events to scroll through dropdown list
 - Virtual scrolling for large data sets
 - Supports custom classes and custom css styles at various DOM levels
 - Ability to integrate 3rd party styling packages like bootstrap, tailwind or other CSS libraries.
@@ -24,8 +25,9 @@ React 16.8+, 17, 18 or higher which has `react hooks` support.
 
 | Package version | Description | 
 | :-------- | :-----------|
-| `2.0.3` | Removed native javascript reference to get width of the div and implemented useRef. Fixed a minor bug related to width of the autocomplete dropdown list when using the module multiple times in the same component |
-| `2.0.2` | Fixed a non-impact bug related to View More Input props. Added resize listener to adjust the width of dropdownlist during resize events. Resize event listener will be destroyed once dropdown list is closed on select or onBlur |
+| `2.1.0`  | Recommended. Added keyboard navigation events to scroll through dropdown list. Refer changelog for more information. |
+| 2.0.3 | Removed native javascript reference to get width of the div and implemented useRef. Fixed a minor bug related to width of the autocomplete dropdown list when using the module multiple times in the same component |
+| 2.0.2 | Fixed a non-impact bug related to View More Input props. Added resize listener to adjust the width of dropdownlist during resize events. Resize event listener will be destroyed once dropdown list is closed on select or onBlur |
 | 2.0.1 | Added View More feature for lazy loading API calls. Upgrading from lower versions to `2.0.1` is safe without any configuration change |
 | 2.0.0  | Search algorithm has been updated for better search results. No change in types or schema. Upgrading from `1.0.1` to `2.0.0`is safe without any impact. |
 | 1.0.1   | Autocomplete search package |
@@ -94,7 +96,7 @@ To run tests, clone the repository, install the packages and run the following c
 | `scrollThreshold` | `number` | `No` | 3 by default. Helps to boost performance. It controls the scroll data and removes top or botton records during user scroll based on the scrollThreshold & scrollData configured. Check below for more details. |
 |`defaultValue`| `string` or `object` | `No` | `defaultValue` pre-populates the value in input textfield by matching the value from dropdown data. It can be a simple value or simple json object. For simple json object, `objectProperty` value should be available. |
 |`totalRecords` | `number` | `No` | If total number of records is known, totalRecords can be provided which will avoid extra condtions that will be executed in the package.
-|`disableProperty` | `string` | `No` | To disable specific dropdown list in dropdown from being selected. This property can be used when dropdownData is an object[] and the `disableProperty` should be a property name from the object which can determine whether the specific list should be disabled from selection. Eg: If an object conatins a property `disabled`, then this property name can be passed to `disableProperty` props to disbale the list from selection when condition matches. |
+|`disableProperty` | `string` | `No` | To disable specific dropdown list in dropdown from being selected. This property can be used when dropdownData is an object[] and the `disableProperty` should be a property name from the object which can determine whether the specific list should be disabled from selection. Eg: If an object conatins a property `disabled`, then this property name can be passed to `disableProperty` props to disable the list from selection when condition matches. |
 |`disableListFn` |`Function` |`No` | If disable should be calculated dynamically using a function and custom code, assign customized function to `disableListFn`. disableListFn accepts two parameters (index, data)|
 |`searchFn` |`Function` |`No` | Customized search function. Customized search function accepts one parameter, `event`. On keyUp, the customized search function will be called to perform custom execution.|
 |`noSearchResultMessage` |`string` |`No` | By default **No results found** message will be displayed when search result is 0  |

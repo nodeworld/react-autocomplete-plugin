@@ -54,7 +54,7 @@ function Core(props: InputFieldType) {
 
     const unOrderedList = useRef<HTMLUListElement>(null);
 
-    const listRef = useRef<HTMLLIElement>(null);
+    const listRef = useRef<HTMLLIElement[]>([]);
 
     const [showSpinner, setShowSpinner] = useState<boolean>(false);
 
@@ -85,6 +85,12 @@ function Core(props: InputFieldType) {
 
     const listContainerRef = useRef<HTMLDivElement>(null);
 
+    const viewMoreElement = useRef<HTMLLIElement>(null);
+
+    const listFocusIndex = useRef<number>(-1);
+
+    const isViewMoreFocused = useRef<boolean>(false);
+
     function setWidth() {
         const listWidth = listContainerRef.current?.style;
         const inputFieldWidth = searchValue.current?.clientWidth;
@@ -103,6 +109,7 @@ function Core(props: InputFieldType) {
         if (props.isAutoCompleteDisabled) { return; }
         setisOnFocus(true);
         setWidth();
+        searchValue.current?.addEventListener('keydown', keyboardEvent);
         window.addEventListener("resize", resizeListener);
         const getListId = listContainerRef.current?.style;
         const getInputId = searchValue.current?.clientWidth;
@@ -115,14 +122,91 @@ function Core(props: InputFieldType) {
         if (filteredData.length <= 0) {
             if (isInputFieldDirty && searchValue.current?.value && searchValue.current.value !== '') {
                 onSearch(null);
-            } else {
-                setData(props.dropdownData, props.defaultValue, props.objectProperty);
-            }
+            } 
+            // else {
+            //     setData(props.dropdownData, props.defaultValue, props.objectProperty);
+            // }
         }
     }
 
-    const onSelect = (selectedValue: any) => {
+    const keyboardEvent = (event: any) => {
+        if (filteredData.length <= 0) { return; }
+        let id; let getIndex;
+        switch(event?.keyCode) {
+            case 13:
+                if (isViewMoreFocused.current) {
+                    onViewMore(null);
+                    isViewMoreFocused.current = false;
+                    return;
+                  }
+                  if(listRef.current[listFocusIndex.current]?.classList.contains('disable-list-element')) {
+                    return;
+                  }
+                  const getData = filteredData[listFocusIndex.current];
+                  if (getData !== undefined && getData !== null) {
+                    onSelect(listFocusIndex.current, getData);
+                    listRef.current[listFocusIndex.current]?.classList.remove('autocomplete-keydown-background');
+                  }       
+                  return;
+            case 40:
+                if (listFocusIndex.current + 1 === listRef.current.length) {
+                    if (viewMoreElement.current) {
+                        viewMoreElement.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        viewMoreElement.current?.classList.add('autocomplete-keydown-viewmore');
+                        listRef.current[listFocusIndex.current]?.classList.remove('autocomplete-keydown-background');
+                        isViewMoreFocused.current = true;
+                    }
+                    return;
+                  }
+                  listFocusIndex.current = listFocusIndex.current + 1;
+                  id = listRef.current[listFocusIndex.current]?.id;
+                  if (id === undefined || id === null) { return; }
+                  if (!id.includes('autocomplete-li-element-')) { return; }
+                  getIndex = Number(id.substring(id.lastIndexOf('-') + 1));
+                  if (typeof getIndex !== 'number') { return; }
+                  setTimeout(() => {
+                    listRef.current[listFocusIndex.current]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    listRef.current[listFocusIndex.current]?.classList.add('autocomplete-keydown-background');
+                    if (listFocusIndex.current > 0) {
+                        listRef.current[listFocusIndex.current - 1]?.classList.remove('autocomplete-keydown-background');
+                        if (listFocusIndex.current + 1 === listRef.current.length && displayViewMoreButton) {
+                            unOrderedList.current?.scrollTo(0, unOrderedList.current?.scrollHeight + 10);
+                        }
+                    }
+                  }, 20)
+                return;
+            case 38:
+                if (listFocusIndex.current <= 0) { return; }
+                if (isViewMoreFocused.current) {
+                    viewMoreElement.current?.classList.remove('autocomplete-keydown-viewmore');
+                    isViewMoreFocused.current = false;
+                } else {
+                    listFocusIndex.current = listFocusIndex.current - 1;
+                }
+                id = listRef.current[listFocusIndex.current]?.id;
+                if (id === undefined || id === null) { return; }
+                if (!id.includes('autocomplete-li-element-')) { return; }
+                getIndex = Number(id.substring(id.lastIndexOf('-') + 1));
+                if (typeof getIndex !== 'number') { return; }
+                setTimeout(() => {
+                    listRef.current[listFocusIndex.current]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    listRef.current[listFocusIndex.current]?.classList.add('autocomplete-keydown-background');
+                    listRef.current[listFocusIndex.current + 1]?.classList.remove('autocomplete-keydown-background');
+                }, 20);
+                return;
+            default:
+                return;
+        }
+    }
+
+    const onSelect = (index: number, selectedValue: any) => {
         if (selectedValue === undefined || selectedValue === null) { return; }
+        if (props.disableProperty && selectedValue[props.disableProperty]) {
+            return;
+        }
+        if (props.disableListFn !== undefined && props.disableListFn !== null && props.disableListFn(index, selectedValue)) {
+            return;
+        }
         if (props.objectProperty) {
             searchValue.current!.value = selectedValue[props.objectProperty];
         } else {
@@ -130,10 +214,14 @@ function Core(props: InputFieldType) {
         }
         setisOnFocus(false);
         window.removeEventListener("resize", resizeListener);
+        window.removeEventListener("keydown", keyboardEvent);
         setInputFieldDirty(false);
         setFilteredData([]);
         setSearchedData([]);
         setDisplayViewMoreButton(false);
+        listFocusIndex.current = -1;
+        isViewMoreFocused.current = false;
+        listRef.current = [];
         if (props.broadcastSelectedValue) {
             props.broadcastSelectedValue(selectedValue);
         }
@@ -147,6 +235,9 @@ function Core(props: InputFieldType) {
             searchValue.current?.focus();
             return;
         }
+        if ((event?.relatedTarget as HTMLElement)?.classList?.contains('disable-list-element')) {
+            return;
+        }
         if ((event?.relatedTarget as HTMLElement)?.classList?.contains('autocomplete-data-list')) {
             return;
         }
@@ -156,6 +247,9 @@ function Core(props: InputFieldType) {
         }
         setisOnFocus(false);
         setFilteredData([]);
+        listFocusIndex.current = -1;
+        isViewMoreFocused.current = false;
+        listRef.current = [];
         window.removeEventListener("resize", resizeListener);
         if (props.triggerBlurEvent && typeof props.triggerBlurEvent === 'function') {
             props.triggerBlurEvent(event)
@@ -193,6 +287,9 @@ function Core(props: InputFieldType) {
                 setInputFieldDirty(true);
             }
             scrollDownIndex.current = 0; //reset
+            if (!isOnFocus) {
+                setisOnFocus(true);
+              }
             if (props.searchFn && typeof props.searchFn === 'function') {
                 const result = await props.searchFn(searchValue.current.value, props.dropdownData);
                 if (result && result.length > 0) {
@@ -253,6 +350,23 @@ function Core(props: InputFieldType) {
         return;
         
     }
+
+    const isDisplayViewButton = useCallback(() => {
+        if (typeof props.totalRecords !== 'undefined' && dropdownDataLength >= props.totalRecords) {
+          setDisplayViewMoreButton(false);
+          return;
+        }
+        if (searchValue.current?.value && searchValue.current.value !== '' && props.isApiLoad && !isEventEmitted) {
+          setDisplayViewMoreButton(true);
+          return;
+        }
+        if (scrollDownIndex.current >= dropdownDataLength) {
+          setDisplayViewMoreButton(true);
+          return;
+        }
+        setDisplayViewMoreButton(false);
+        return;
+      }, [dropdownDataLength, props.totalRecords, isEventEmitted, props.isApiLoad]);
 
     const loadNextSetData = () => {
         try {
@@ -331,6 +445,7 @@ function Core(props: InputFieldType) {
             if (data.length <= initialVisibleData) {
                 setFilteredData(data);
                 scrollDownIndex.current = data.length;
+                isDisplayViewButton();
                 return;
             }
             let getFirstSetData = data.slice(0, initialVisibleData);
@@ -344,11 +459,12 @@ function Core(props: InputFieldType) {
             }
             setFilteredData(getFirstSetData);
             setDropdownDataLength(data.length);
+            isDisplayViewButton();
             return;
         } catch (error) {
             console.log(error);
         }
-    }, [initialVisibleData, isInputFieldDirty]);
+    }, [initialVisibleData, isInputFieldDirty, isDisplayViewButton]);
 
     const loadNextApiSet = useCallback((dropdownData: any) => {
         try {
@@ -446,23 +562,6 @@ function Core(props: InputFieldType) {
           }
     }
 
-  function isDisplayViewButton() {
-    if (typeof props.totalRecords !== 'undefined' && dropdownDataLength >= props.totalRecords) {
-      setDisplayViewMoreButton(false);
-      return;
-    }
-    if (searchValue.current?.value && searchValue.current.value !== '' && props.isApiLoad && !isEventEmitted) {
-      setDisplayViewMoreButton(true);
-      return;
-    }
-    if (scrollDownIndex.current >= dropdownDataLength) {
-      setDisplayViewMoreButton(true);
-      return;
-    }
-    setDisplayViewMoreButton(false);
-    return;
-  }
-
     useEffect(() => {
         if(!isOnFocus) { return; }
         const listWidth = listContainerRef.current?.style;
@@ -475,6 +574,12 @@ function Core(props: InputFieldType) {
             return;
         }
     }, [dropdownDataLength, isEventEmitted, props.triggerApiLoadEvent, loadNextApiSet, props.dropdownData, isOnFocus])
+
+    useEffect(() => {
+        if (!isOnFocus) {
+            setData(props.dropdownData, props.defaultValue, props.objectProperty);
+        }
+    }, [setData, props.dropdownData, props.defaultValue, props.objectProperty, isOnFocus])
 
     useEffect(() => {
         if (isEventEmitted || dropdownDataLength > 0) { return; }
@@ -501,7 +606,7 @@ function Core(props: InputFieldType) {
                 }
             }
         }
-    }, [props.dropdownData, setData, props.defaultValue, props.objectProperty, isEventEmitted, dropdownDataLength]);
+    }, [props.dropdownData, props.defaultValue, props.objectProperty, isEventEmitted, dropdownDataLength]);
 
     return (
         <React.Fragment>
@@ -552,7 +657,7 @@ function Core(props: InputFieldType) {
                                             dropdownListStyle={props.customStyle?.dropdownListStyle}
                                             key={index}
                                             objectProperty={props.objectProperty}
-                                            ref={listRef}
+                                            ref={(el: any) => {listRef.current[index] = el}}
                                         />
                                     );
                                 })
@@ -585,7 +690,8 @@ function Core(props: InputFieldType) {
                                     style={props?.customStyle?.viewMoreStyle ? props.customStyle.viewMoreStyle : {}}
                                     aria-label={props.aria?.ariaViewMore ? props.aria.ariaViewMore : 'View more results'}
                                     tabIndex={0}
-                                    onClick={onViewMore}>
+                                    onClick={onViewMore}
+                                    ref={viewMoreElement}>
                                     {viewMoreText}
                                 </li>
                             }
