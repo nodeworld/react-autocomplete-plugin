@@ -41,7 +41,7 @@ function DropdownList(props: ListType, listRef: Ref<HTMLLIElement>) {
                 className={`${applyClasses()}${((props.disableProperty && props.data[props.disableProperty]) || (props.disableListFn && props.disableListFn(props.index, props.data))) ? ' disable-list-element' : ''}`}
                 style={applyStyle()}
                 key={props.index}
-                onMouseDown={() => props.onSelect(props.index, props.data)}
+                onMouseDown={() => props.onSelect(props.index, props.data, true)}
                 aria-disabled={((props.disableProperty && props.data[props.disableProperty]) || (props.disableListFn && props.disableListFn(props.index, props.data))) ? true : false}
                 aria-label={props.objectProperty ? props.data[props.objectProperty] : props.data}>
                 {props.objectProperty ? props.data[props.objectProperty] : props.data}

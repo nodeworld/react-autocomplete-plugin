@@ -82,6 +82,18 @@ function Core(props: InputFieldType) {
     const showViewMore = (props.showViewMore !== undefined && props.showViewMore !== null) ? props.showViewMore : true;
 
     const showLoadingSpinner = (props.showLoadingSpinner !== undefined && props.showLoadingSpinner !== null) ? props.showLoadingSpinner : true;
+    
+    const isApiLoad = (props.isApiLoad !== undefined && props.isApiLoad !== null) ? props.isApiLoad : false;
+
+    const disableProperty = (props.disableProperty !== undefined && props.disableProperty !== null) ? props.disableProperty : undefined;
+
+    const objectProperty = (props.objectProperty !== undefined && props.objectProperty !== null) ? props.objectProperty : undefined;
+
+    const triggerApiLoadEvent = (props.triggerApiLoadEvent !== undefined && props.triggerApiLoadEvent !== null && typeof props.triggerApiLoadEvent === 'function') ? props.triggerApiLoadEvent : undefined;
+
+    const disableListFn = (props.disableListFn !== undefined && props.disableListFn !== null && typeof props.disableListFn === 'function') ? props.disableListFn : undefined;
+    
+    const broadcastSelectedValue = (props.broadcastSelectedValue !== undefined && props.broadcastSelectedValue !== null && typeof props.broadcastSelectedValue === 'function') ? props.broadcastSelectedValue : undefined;
 
     const listContainerRef = useRef<HTMLDivElement>(null);
 
@@ -91,26 +103,19 @@ function Core(props: InputFieldType) {
 
     const isViewMoreFocused = useRef<boolean>(false);
 
-    function setWidth() {
+    const setWidth = useCallback(() => {
         const listWidth = listContainerRef.current?.style;
         const inputFieldWidth = searchValue.current?.clientWidth;
         if (listWidth && inputFieldWidth) {
             listWidth.width = inputFieldWidth+'px';
         }
         return;
-    }
+    }, [])
     
-    const resizeListener = useCallback(() => {
-        setWidth();
-    }, []);
-
-
     const handleOnFocusEvent = (event: any) => {
         if (props.isAutoCompleteDisabled) { return; }
         setisOnFocus(true);
         setWidth();
-        searchValue.current?.addEventListener('keydown', keyboardEvent);
-        window.addEventListener("resize", resizeListener);
         const getListId = listContainerRef.current?.style;
         const getInputId = searchValue.current?.clientWidth;
         if (getListId && getInputId) {
@@ -124,108 +129,35 @@ function Core(props: InputFieldType) {
                 onSearch(null);
             } 
             else {
-                setData(props.dropdownData, props.defaultValue, props.objectProperty);
+                setData(props.dropdownData, props.defaultValue, objectProperty);
             }
         }
     }
 
-    const keyboardEvent = (event: any) => {
-        if (filteredData.length <= 0) { return; }
-        let id; let getIndex;
-        switch(event?.keyCode) {
-            case 13:
-                if (isViewMoreFocused.current) {
-                    onViewMore(null);
-                    isViewMoreFocused.current = false;
-                    return;
-                  }
-                  if(listRef.current[listFocusIndex.current]?.classList.contains('disable-list-element')) {
-                    return;
-                  }
-                  const getData = filteredData[listFocusIndex.current];
-                  if (getData !== undefined && getData !== null) {
-                    onSelect(listFocusIndex.current, getData);
-                    listRef.current[listFocusIndex.current]?.classList.remove('autocomplete-keydown-background');
-                  }       
-                  return;
-            case 40:
-                if (listFocusIndex.current + 1 === listRef.current.length) {
-                    if (viewMoreElement.current) {
-                        viewMoreElement.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        viewMoreElement.current?.classList.add('autocomplete-keydown-viewmore');
-                        listRef.current[listFocusIndex.current]?.classList.remove('autocomplete-keydown-background');
-                        isViewMoreFocused.current = true;
-                    }
-                    return;
-                  }
-                  listFocusIndex.current = listFocusIndex.current + 1;
-                  id = listRef.current[listFocusIndex.current]?.id;
-                  if (id === undefined || id === null) { return; }
-                  if (!id.includes('autocomplete-li-element-')) { return; }
-                  getIndex = Number(id.substring(id.lastIndexOf('-') + 1));
-                  if (typeof getIndex !== 'number') { return; }
-                  setTimeout(() => {
-                    listRef.current[listFocusIndex.current]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    listRef.current[listFocusIndex.current]?.classList.add('autocomplete-keydown-background');
-                    if (listFocusIndex.current > 0) {
-                        listRef.current[listFocusIndex.current - 1]?.classList.remove('autocomplete-keydown-background');
-                        if (listFocusIndex.current + 1 === listRef.current.length && displayViewMoreButton) {
-                            unOrderedList.current?.scrollTo(0, unOrderedList.current?.scrollHeight + 10);
-                        }
-                    }
-                  }, 20)
-                return;
-            case 38:
-                if (listFocusIndex.current <= 0) { return; }
-                if (isViewMoreFocused.current) {
-                    viewMoreElement.current?.classList.remove('autocomplete-keydown-viewmore');
-                    isViewMoreFocused.current = false;
-                } else {
-                    listFocusIndex.current = listFocusIndex.current - 1;
-                }
-                id = listRef.current[listFocusIndex.current]?.id;
-                if (id === undefined || id === null) { return; }
-                if (!id.includes('autocomplete-li-element-')) { return; }
-                getIndex = Number(id.substring(id.lastIndexOf('-') + 1));
-                if (typeof getIndex !== 'number') { return; }
-                setTimeout(() => {
-                    listRef.current[listFocusIndex.current]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    listRef.current[listFocusIndex.current]?.classList.add('autocomplete-keydown-background');
-                    listRef.current[listFocusIndex.current + 1]?.classList.remove('autocomplete-keydown-background');
-                }, 20);
-                return;
-            default:
-                return;
-        }
-    }
-
-    const onSelect = (index: number, selectedValue: any) => {
+    const onSelect = useCallback((index: number, selectedValue: any, isTriggredProgramatically: boolean) => {
+        if (!isTriggredProgramatically) { return false; }
         if (selectedValue === undefined || selectedValue === null) { return; }
-        if (props.disableProperty && selectedValue[props.disableProperty]) {
+        if (disableProperty && selectedValue[disableProperty]) {
             return;
         }
-        if (props.disableListFn !== undefined && props.disableListFn !== null && props.disableListFn(index, selectedValue)) {
+        if (disableListFn !== undefined && disableListFn !== null && disableListFn(index, selectedValue)) {
             return;
         }
-        if (props.objectProperty) {
-            searchValue.current!.value = selectedValue[props.objectProperty];
+        if (objectProperty) {
+            searchValue.current!.value = selectedValue[objectProperty];
         } else {
             searchValue.current!.value = selectedValue;
         }
         setisOnFocus(false);
-        window.removeEventListener("resize", resizeListener);
-        window.removeEventListener("keydown", keyboardEvent);
         setInputFieldDirty(false);
         setFilteredData([]);
         setSearchedData([]);
         setDisplayViewMoreButton(false);
-        listFocusIndex.current = -1;
-        isViewMoreFocused.current = false;
-        listRef.current = [];
-        if (props.broadcastSelectedValue) {
-            props.broadcastSelectedValue(selectedValue);
+        resetListFocusOptions();
+        if (broadcastSelectedValue) {
+            broadcastSelectedValue(selectedValue);
         }
-    }
+    },[broadcastSelectedValue, disableListFn, disableProperty, objectProperty]);
 
     const handleOnBlurEvent = (event: any) => {
         if ((event?.relatedTarget as HTMLElement)?.classList?.contains('arrow')) {
@@ -247,10 +179,7 @@ function Core(props: InputFieldType) {
         }
         setisOnFocus(false);
         setFilteredData([]);
-        listFocusIndex.current = -1;
-        isViewMoreFocused.current = false;
-        listRef.current = [];
-        window.removeEventListener("resize", resizeListener);
+        resetListFocusOptions();
         if (props.triggerBlurEvent && typeof props.triggerBlurEvent === 'function') {
             props.triggerBlurEvent(event)
         }
@@ -301,8 +230,8 @@ function Core(props: InputFieldType) {
                     return;
                 }
             }
-            if (props.objectProperty) {
-                const getSearchData = props.dropdownData.filter(dt => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
+            if (objectProperty) {
+                const getSearchData = props.dropdownData.filter(dt => dt[objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
                 if (getSearchData.length > 0) {
                     const getFirstSetData = getSearchData.slice(0, initialVisibleData);
                     scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
@@ -356,7 +285,7 @@ function Core(props: InputFieldType) {
           setDisplayViewMoreButton(false);
           return;
         }
-        if (searchValue.current?.value && searchValue.current.value !== '' && props.isApiLoad && !isEventEmitted) {
+        if (searchValue.current?.value && searchValue.current.value !== '' && isApiLoad && !isEventEmitted) {
           setDisplayViewMoreButton(true);
           return;
         }
@@ -366,7 +295,7 @@ function Core(props: InputFieldType) {
         }
         setDisplayViewMoreButton(false);
         return;
-      }, [dropdownDataLength, props.totalRecords, isEventEmitted, props.isApiLoad]);
+      }, [dropdownDataLength, props.totalRecords, isEventEmitted, isApiLoad]);
 
     const loadNextSetData = () => {
         try {
@@ -382,7 +311,7 @@ function Core(props: InputFieldType) {
     const nextSet = () => {
         const dropdownData = searchedData.length > 0 ? [...searchedData] : [...props.dropdownData];
         if(props.dropdownData.length === scrollDownIndex.current || searchedData.length === scrollDownIndex.current) {
-            if (!isEventEmitted && props.isApiLoad && props.triggerApiLoadEvent && typeof props.triggerApiLoadEvent === 'function') {
+            if (!isEventEmitted && isApiLoad && triggerApiLoadEvent && typeof triggerApiLoadEvent === 'function') {
                 if (props.optViewMoreOnlyForApiCall) {
                     setDisplayViewMoreButton(true);
                     setTimeout(() => {
@@ -390,7 +319,7 @@ function Core(props: InputFieldType) {
                     }, 75);
                     return;
                 }
-                props.triggerApiLoadEvent({ dataIndex: props.dropdownData.length });
+                triggerApiLoadEvent({ dataIndex: props.dropdownData.length });
                 setIsEventEmitted(true);
                 if (showLoadingSpinner) {
                     setShowSpinner(true);
@@ -411,8 +340,8 @@ function Core(props: InputFieldType) {
                 if (getNextDataSet.length > 0) {
                     scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
                     if (isInputFieldDirty && (searchValue.current?.value && searchValue.current!.value !== '')) {
-                        if (props.objectProperty) {
-                            getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                        if (objectProperty) {
+                            getNextDataSet = getNextDataSet.filter((dt: any) => dt[objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
                         } else {
                             getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
                         }
@@ -424,8 +353,8 @@ function Core(props: InputFieldType) {
                 if (getNextDataSet.length > 0) {
                     scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
                     if (isInputFieldDirty && (searchValue.current?.value && searchValue.current!.value !== '')) {
-                        if (props.objectProperty) {
-                            getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
+                        if (objectProperty) {
+                            getNextDataSet = getNextDataSet.filter((dt: any) => dt[objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
                         } else {
                             getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(searchValue.current!.value?.toString()?.toLowerCase().trim()));
                         }
@@ -458,7 +387,6 @@ function Core(props: InputFieldType) {
                 }
             }
             setFilteredData(getFirstSetData);
-            setDropdownDataLength(data.length);
             isDisplayViewButton();
             return;
         } catch (error) {
@@ -471,8 +399,8 @@ function Core(props: InputFieldType) {
             if (!isEventEmitted) { return; }
             if (searchValue.current?.value && searchValue.current.value !== '') {
                 let getSearchData;
-                if (props.objectProperty) {
-                    getSearchData = dropdownData.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
+                if (objectProperty) {
+                    getSearchData = dropdownData.filter((dt: any) => dt[objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
                 } else {
                     getSearchData = dropdownData.filter((dt: any) => dt?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
                 }
@@ -495,12 +423,10 @@ function Core(props: InputFieldType) {
                     setTimeout(() => {
                         unOrderedList.current?.scrollTo(0, Math.ceil((unOrderedList.current!.scrollHeight * 50) / 100));
                         setIsEventEmitted(false);
-                        setDropdownDataLength(dropdownData.length);
                         setShowSpinner(false);
                     }, 100);
                 } else {
                     setIsEventEmitted(false);
-                    setDropdownDataLength(dropdownData.length);
                     setShowSpinner(false);
                     setSearchedData([]);
                     setFilteredData([])
@@ -518,8 +444,8 @@ function Core(props: InputFieldType) {
                     if (getNextDataSet.length > 0) {
                         scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
                         if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
-                            if (props.objectProperty) {
-                                getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                            if (objectProperty) {
+                                getNextDataSet = getNextDataSet.filter((dt: any) => dt[objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
                             } else {
                                 getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
                             }
@@ -531,8 +457,8 @@ function Core(props: InputFieldType) {
                     if (getNextDataSet.length > 0) {
                         scrollDownIndex.current = scrollDownIndex.current + getNextDataSet.length;
                         if (props.defaultValue && (searchValue.current?.value && searchValue.current!.value !== '')) {
-                            if (props.objectProperty) {
-                                getNextDataSet = getNextDataSet.filter((dt: any) => dt[props.objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
+                            if (objectProperty) {
+                                getNextDataSet = getNextDataSet.filter((dt: any) => dt[objectProperty!]?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
                             } else {
                                 getNextDataSet = getNextDataSet.filter((dt: any) => dt?.toString().toLowerCase().includes(props.defaultValue?.toString()?.toLowerCase().trim()));
                             }
@@ -543,23 +469,36 @@ function Core(props: InputFieldType) {
                 setTimeout(() => {
                     unOrderedList.current?.scrollTo(0, Math.ceil((unOrderedList.current!.scrollHeight * 50) / 100));
                     setIsEventEmitted(false);
-                    setDropdownDataLength(dropdownData.length);
                     setShowSpinner(false);
                 }, 100);
             }
         } catch (error) {
             console.log(error);
         }
-    }, [filteredData, initialVisibleData, isScrollThresholdRequired, scrollThreshold, isEventEmitted, props.objectProperty, props.defaultValue, isInputFieldDirty])
+    }, [filteredData, initialVisibleData, isScrollThresholdRequired, scrollThreshold, isEventEmitted, objectProperty, props.defaultValue, isInputFieldDirty])
 
-    const onViewMore = (_event: any) => {
-        if (props.isApiLoad && !isEventEmitted && typeof props.triggerApiLoadEvent === 'function') {
-            props.triggerApiLoadEvent({ dataIndex: dropdownDataLength });
+    const onViewMore = useCallback((_event: any, isTriggredProgramatically: boolean) => {
+        if (!isTriggredProgramatically) { return; }
+        if (isApiLoad && !isEventEmitted && typeof triggerApiLoadEvent === 'function') {
+            triggerApiLoadEvent({ dataIndex: dropdownDataLength });
+            searchValue.current?.focus();
             setIsEventEmitted(true);
             if (showLoadingSpinner) {
               setShowSpinner(true);
             }
           }
+    },[isApiLoad, isEventEmitted, triggerApiLoadEvent, dropdownDataLength, showLoadingSpinner]);
+
+    const resetListFocusOptions = () => {
+        if (listFocusIndex.current !== -1) {
+            listRef.current[listFocusIndex.current]?.classList.remove('autocomplete-keydown-background');
+        }
+        if (isViewMoreFocused.current) {
+            viewMoreElement.current?.classList.remove('autocomplete-keydown-viewmore');
+        }
+        listFocusIndex.current = -1;
+        isViewMoreFocused.current = false;
+        listRef.current = [];
     }
 
     useEffect(() => {
@@ -569,35 +508,142 @@ function Core(props: InputFieldType) {
         if (listWidth?.width !== inputFieldWidth + 'px') {
             setWidth();
         }
-        if (isEventEmitted && dropdownDataLength !== props.dropdownData.length && typeof props.triggerApiLoadEvent === 'function') {
+        if (isEventEmitted && dropdownDataLength !== props.dropdownData.length && typeof triggerApiLoadEvent === 'function') {
             loadNextApiSet(props.dropdownData)
             return;
         }
-    }, [dropdownDataLength, isEventEmitted, props.triggerApiLoadEvent, loadNextApiSet, props.dropdownData, isOnFocus])
+    }, [dropdownDataLength, isEventEmitted, triggerApiLoadEvent, loadNextApiSet, props.dropdownData, isOnFocus, setWidth])
 
     useEffect(() => {
         if (!isOnFocus) {
-            setData(props.dropdownData, props.defaultValue, props.objectProperty);
+            setData(props.dropdownData, props.defaultValue, objectProperty);
         }
-    }, [setData, props.dropdownData, props.defaultValue, props.objectProperty, isOnFocus])
+    }, [setData, props.dropdownData, props.defaultValue, objectProperty, isOnFocus]);
+
+    useEffect(() => {
+        if (props.dropdownData.length > 0) {
+            setDropdownDataLength(props.dropdownData.length);
+        }
+    }, [props.dropdownData])
+
+    useEffect(() => {
+        const resizeListener =() => {
+            setWidth();
+        };
+        if (!isOnFocus) {
+            window.removeEventListener('resize', resizeListener)
+        } else {
+            window.addEventListener('resize', resizeListener);
+        }
+        return () => window.removeEventListener('resize', resizeListener);
+    }, [setWidth, isOnFocus])
+
+    useEffect(() => {
+        const keyboardEvent = (event: any) => {
+            if (filteredData.length <= 0 && event?.keyCode !== 27) {
+                return;
+            }
+            let id; let getIndex;
+            switch(event?.keyCode) {
+                case 27:
+                    if (isOnFocus || searchValue.current?.value) {
+                        searchValue.current!.value = '';
+                        setisOnFocus(false);
+                        searchValue.current?.blur();
+                        resetListFocusOptions();
+                    }
+                    return;
+                case 13:
+                    if (isViewMoreFocused.current) {
+                        onViewMore(null, true);
+                        isViewMoreFocused.current = false;
+                        return;
+                      }
+                      if(listRef.current[listFocusIndex.current]?.classList.contains('disable-list-element')) {
+                        return;
+                      }
+                      const getData = filteredData[listFocusIndex.current];
+                      if (getData !== undefined && getData !== null) {
+                        onSelect(listFocusIndex.current, getData, true);
+                        listRef.current[listFocusIndex.current]?.classList.remove('autocomplete-keydown-background');
+                      }       
+                      searchValue.current?.blur();
+                      return;
+                case 40:
+                    if (listFocusIndex.current + 1 === listRef.current.length) {
+                        if (viewMoreElement.current) {
+                            viewMoreElement.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            viewMoreElement.current?.classList.add('autocomplete-keydown-viewmore');
+                            listRef.current[listFocusIndex.current]?.classList.remove('autocomplete-keydown-background');
+                            isViewMoreFocused.current = true;
+                        }
+                        return;
+                      }
+                      listFocusIndex.current = listFocusIndex.current + 1;
+                      id = listRef.current[listFocusIndex.current]?.id;
+                      if (id === undefined || id === null) { return; }
+                      if (!id.includes('autocomplete-li-element-')) { return; }
+                      getIndex = Number(id.substring(id.lastIndexOf('-') + 1));
+                      if (typeof getIndex !== 'number') { return; }
+                      setTimeout(() => {
+                        listRef.current[listFocusIndex.current]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        listRef.current[listFocusIndex.current]?.classList.add('autocomplete-keydown-background');
+                        if (listFocusIndex.current > 0) {
+                            listRef.current[listFocusIndex.current - 1]?.classList.remove('autocomplete-keydown-background');
+                            if (listFocusIndex.current + 1 === listRef.current.length && displayViewMoreButton) {
+                                unOrderedList.current?.scrollTo(0, unOrderedList.current?.scrollHeight + 10);
+                            }
+                        }
+                      }, 20)
+                    return;
+                case 38:
+                    if (listFocusIndex.current <= 0) { return; }
+                    if (isViewMoreFocused.current) {
+                        viewMoreElement.current?.classList.remove('autocomplete-keydown-viewmore');
+                        isViewMoreFocused.current = false;
+                    } else {
+                        listFocusIndex.current = listFocusIndex.current - 1;
+                    }
+                    id = listRef.current[listFocusIndex.current]?.id;
+                    if (id === undefined || id === null) { return; }
+                    if (!id.includes('autocomplete-li-element-')) { return; }
+                    getIndex = Number(id.substring(id.lastIndexOf('-') + 1));
+                    if (typeof getIndex !== 'number') { return; }
+                    setTimeout(() => {
+                        listRef.current[listFocusIndex.current]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        listRef.current[listFocusIndex.current]?.classList.add('autocomplete-keydown-background');
+                        listRef.current[listFocusIndex.current + 1]?.classList.remove('autocomplete-keydown-background');
+                    }, 20);
+                    return;
+                default:
+                    return;
+            }
+        }
+        if (!isOnFocus) {
+            window.removeEventListener('keydown', keyboardEvent)
+        } else {
+            window.addEventListener('keydown', keyboardEvent);
+        }
+        return () => window.removeEventListener('keydown', keyboardEvent);
+    }, [filteredData, displayViewMoreButton, onSelect, onViewMore, isOnFocus])
 
     useEffect(() => {
         if (isEventEmitted || dropdownDataLength > 0) { return; }
         if (props.defaultValue) {
-            if (props.objectProperty) {
+            if (objectProperty) {
                 let getValue;
                 if (typeof props.defaultValue === 'object') {
-                    getValue = props.dropdownData.find(dt => dt[props.objectProperty!] === props.defaultValue[props.objectProperty!]);
+                    getValue = props.dropdownData.find(dt => dt[objectProperty!] === props.defaultValue[objectProperty!]);
                 } else {
-                    getValue = props.dropdownData.find(dt => dt[props.objectProperty!] === props.defaultValue);
+                    getValue = props.dropdownData.find(dt => dt[objectProperty!] === props.defaultValue);
                 }
                 if (getValue) {
-                    searchValue.current!.value = getValue[props.objectProperty];
+                    searchValue.current!.value = getValue[objectProperty];
                 }
             } else {
                 let getValue;
                 if (typeof props.defaultValue === 'object') {
-                    getValue = props.dropdownData.find(dt => dt === props.defaultValue[props.objectProperty!]);
+                    getValue = props.dropdownData.find(dt => dt === props.defaultValue[objectProperty!]);
                 } else {
                     getValue = props.dropdownData.find(dt => dt=== props.defaultValue);
                 }
@@ -606,7 +652,7 @@ function Core(props: InputFieldType) {
                 }
             }
         }
-    }, [props.dropdownData, props.defaultValue, props.objectProperty, isEventEmitted, dropdownDataLength]);
+    }, [props.dropdownData, props.defaultValue, objectProperty, isEventEmitted, dropdownDataLength]);
 
     return (
         <React.Fragment>
@@ -643,7 +689,7 @@ function Core(props: InputFieldType) {
                             aria-label={props.aria?.ariaULList ? props.aria.ariaULList : 'Autocomplete unordered list'}>
                             {
                                 filteredData.length > 0 && filteredData.map((data: any, index: number) => {
-                                    if (!props.objectProperty && (typeof data === 'object')) {
+                                    if (!objectProperty && (typeof data === 'object')) {
                                         return null
                                     }
                                     return (
@@ -651,12 +697,12 @@ function Core(props: InputFieldType) {
                                             index={index}
                                             onSelect={onSelect}
                                             data={data}
-                                            disableListFn={props.disableListFn}
-                                            disableProperty={props.disableProperty}
+                                            disableListFn={disableListFn}
+                                            disableProperty={disableProperty}
                                             dropdownListClass={props.customClass?.dropdownListClass}
                                             dropdownListStyle={props.customStyle?.dropdownListStyle}
                                             key={index}
-                                            objectProperty={props.objectProperty}
+                                            objectProperty={objectProperty}
                                             ref={(el: any) => {listRef.current[index] = el}}
                                         />
                                     );
@@ -684,13 +730,13 @@ function Core(props: InputFieldType) {
                                 showViewMore &&
                                 !isEventEmitted &&
                                 !showSpinner &&
-                                props.isApiLoad &&
+                                isApiLoad &&
                                 displayViewMoreButton &&
                                 <li className={assignClass('autocomplete-data-list view-more', props?.customClass?.viewMoreClass)}
                                     style={props?.customStyle?.viewMoreStyle ? props.customStyle.viewMoreStyle : {}}
                                     aria-label={props.aria?.ariaViewMore ? props.aria.ariaViewMore : 'View more results'}
                                     tabIndex={0}
-                                    onClick={onViewMore}
+                                    onClick={(event) => onViewMore(event, true)}
                                     ref={viewMoreElement}>
                                     {viewMoreText}
                                 </li>
