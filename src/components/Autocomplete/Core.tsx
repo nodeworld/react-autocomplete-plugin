@@ -270,6 +270,16 @@ function Core(props: InputFieldType) {
         } else if (isScrollThresholdRequired && event.target.scrollTop < 10 && filteredData.length > initialVisibleData) {
             initData();
         }
+        if (event.target.scrollTop === 0) {
+            if (listFocusIndex.current !== -1) {
+                listRef.current[listFocusIndex.current]?.classList.remove('autocomplete-keydown-background');
+            }
+            if (isViewMoreFocused.current) {
+                viewMoreElement.current?.classList.remove('autocomplete-keydown-viewmore');
+            }
+            listFocusIndex.current = -1;
+            isViewMoreFocused.current = false;
+        }
     }
 
     const initData = () => {
