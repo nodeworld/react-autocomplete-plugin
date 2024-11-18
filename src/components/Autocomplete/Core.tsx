@@ -270,6 +270,16 @@ function Core(props: InputFieldType) {
         } else if (isScrollThresholdRequired && event.target.scrollTop < 10 && filteredData.length > initialVisibleData) {
             initData();
         }
+        if (event.target.scrollTop === 0) {
+            if (listFocusIndex.current !== -1) {
+                listRef.current[listFocusIndex.current]?.classList.remove('autocomplete-keydown-background');
+            }
+            if (isViewMoreFocused.current) {
+                viewMoreElement.current?.classList.remove('autocomplete-keydown-viewmore');
+            }
+            listFocusIndex.current = -1;
+            isViewMoreFocused.current = false;
+        }
     }
 
     const initData = () => {
@@ -546,14 +556,14 @@ function Core(props: InputFieldType) {
             let id; let getIndex;
             switch(event?.keyCode) {
                 case 27:
-                    if (isOnFocus || searchValue.current?.value) {
-                        searchValue.current!.value = '';
+                    if (isOnFocus) {
                         setisOnFocus(false);
                         searchValue.current?.blur();
                         resetListFocusOptions();
                     }
                     return;
                 case 13:
+                    if (!isOnFocus) { return; }
                     if (isViewMoreFocused.current) {
                         onViewMore(null, true);
                         isViewMoreFocused.current = false;
@@ -570,6 +580,7 @@ function Core(props: InputFieldType) {
                       searchValue.current?.blur();
                       return;
                 case 40:
+                    if (!isOnFocus) { return; }
                     if (listFocusIndex.current + 1 === listRef.current.length) {
                         if (viewMoreElement.current) {
                             viewMoreElement.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
