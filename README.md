@@ -1,4 +1,3 @@
-![Module JS](https://modulejs.org/img/banner.png?raw=true)
 
 # React Autocomplete 
 
@@ -22,15 +21,10 @@ React 16.8+, 17, 18 or higher which has `react hooks` support.
 - Ability to integrate 3rd party styling packages like bootstrap, tailwind or other CSS libraries.
 - Complete test case coverage.
 
-## Web documentation
-
-Documentation is now available on [modulejs.org](https://modulejs.org)
-
 ## Package version
 
 | Package version | Description | 
 | :-------- | :-----------|
-| `2.1.3` | Added Banner for readme file. Refer [modulejs.org](https://modulejs.org) for clean documentation. |
 | `2.1.2`  | Recommended and stable version. Fixed a bug related to keyboard navigation. Now, keyboard navigation listeners will be removed after selection or blur. Added ESC keyboard event to close autocomplete on pressing ESC button. |
 | 2.1.1  | Added keyboard navigation events to scroll through dropdown list. Refer changelog for more information. |
 | 2.0.3 | Removed native javascript reference to get width of the div and implemented useRef. Fixed a minor bug related to width of the autocomplete dropdown list when using the module multiple times in the same component |
