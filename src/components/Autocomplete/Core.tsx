@@ -556,8 +556,7 @@ function Core(props: InputFieldType) {
             let id; let getIndex;
             switch(event?.keyCode) {
                 case 27:
-                    if (isOnFocus || searchValue.current?.value) {
-                        searchValue.current!.value = '';
+                    if (isOnFocus) {
                         setisOnFocus(false);
                         searchValue.current?.blur();
                         resetListFocusOptions();
