@@ -1,8 +1,8 @@
 # Module version changes and fixes.
 
-## 2.1.2
+## 2.1.3
 
-`Users are safe to upgrade to 2.1.2 from any lower version without any module level changes.`
+`Users are safe to upgrade to 2.1.3 from any lower version without any module level changes.`
 - Fixed a bug related to keyboard navigation. Now, keyboard navigation listeners will be removed after selection or blur.
 - Added excape key keyboard event to close autocomplete on pressing escape.
 - Added callbacks for few functions
