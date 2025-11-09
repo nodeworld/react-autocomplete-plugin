@@ -4,6 +4,17 @@ import { CustomAriaType, CustomClassType, CustomStyleType } from "../../util/typ
 import InputField from "./InputField";
 import DropdownList from "./DropdownList";
 
+export type RelativeSearchType = {
+    includeOnly?: string[];
+    customRelativeSearchFunction?: Function;
+    setDefaultValueWithACustomFunction?: Function;
+}
+
+export type AdditionalDataType = {
+    relativeSearch?: RelativeSearchType | boolean;
+}
+
+
 type InputFieldType = {
     dropdownData: any[];
     initialVisibleData?: number;
@@ -40,6 +51,7 @@ type InputFieldType = {
     viewMoreText?: string;
     showViewMore?: boolean;
     optViewMoreOnlyForApiCall?: boolean;
+    additionalData?: AdditionalDataType;
 }
 
 function Core(props: InputFieldType) {
@@ -231,7 +243,31 @@ function Core(props: InputFieldType) {
                 }
             }
             if (objectProperty) {
-                const getSearchData = props.dropdownData.filter(dt => dt[objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
+                let getSearchData;
+                if (!isRelativeSearch()) {
+                    getSearchData = props.dropdownData.filter(dt => dt[objectProperty!]?.toString().toLowerCase().includes(searchValue.current!.value.toLowerCase().trim()));
+                } else {
+                    const relativeSearch = props.additionalData?.relativeSearch;
+                    if (typeof relativeSearch === 'object' && Object.prototype.hasOwnProperty.call(relativeSearch, 'customRelativeSearchFunction') && typeof relativeSearch.customRelativeSearchFunction === 'function') {
+                        return callCustomRelativeSearchFunction()?.then((searchResponse: any) => {
+                            setSearchedData(searchResponse);
+                            getSearchData = searchResponse;
+                            if (getSearchData.length > 0) {
+                                const getFirstSetData = getSearchData.slice(0, initialVisibleData);
+                                scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
+                                setSearchedData(getSearchData);
+                                setFilteredData(getFirstSetData);
+                                isDisplayViewButton();
+                                return;
+                            }
+                        }).catch(err => {
+                            console.log(err);
+                            setFilteredData([]);
+                        });
+                    }
+                    getSearchData = executeRelativeSearch();
+                    setSearchedData(getSearchData);
+                }
                 if (getSearchData.length > 0) {
                     const getFirstSetData = getSearchData.slice(0, initialVisibleData);
                     scrollDownIndex.current = scrollDownIndex.current + getFirstSetData.length;
@@ -511,6 +547,76 @@ function Core(props: InputFieldType) {
         listRef.current = [];
     }
 
+    const isRelativeSearch = useCallback(() => {
+        return props.additionalData?.relativeSearch ? true : false;
+    }, [props.additionalData?.relativeSearch]);
+
+    const isSetDefaultValueWithACustomFunction = useCallback(() => {
+        if (typeof props.additionalData?.relativeSearch === 'object' && typeof props.additionalData.relativeSearch?.setDefaultValueWithACustomFunction === 'function') {
+            return true;
+        }
+        return false;
+    }, [props.additionalData?.relativeSearch, (props.additionalData?.relativeSearch as RelativeSearchType)?.setDefaultValueWithACustomFunction]);
+
+    const callSetDefaultValueWithACustomFunction = useCallback(() => {
+        return new Promise((resolve, reject) => {
+            const result: any[] = (props.additionalData?.relativeSearch as RelativeSearchType)?.setDefaultValueWithACustomFunction!(searchValue.current?.value);
+            if (result) {
+                resolve(result);
+            }
+            reject([]);
+        });
+    }, [props.additionalData?.relativeSearch, (props.additionalData?.relativeSearch as RelativeSearchType)?.setDefaultValueWithACustomFunction])
+
+    const callCustomRelativeSearchFunction = useCallback(() => {
+        const relativeSearch = props.additionalData?.relativeSearch;
+        if (typeof relativeSearch === 'object' && Object.prototype.hasOwnProperty.call(relativeSearch, 'customRelativeSearchFunction') && typeof relativeSearch.customRelativeSearchFunction === 'function') {
+            return new Promise((resolve, reject) => {
+                const result: any[] = relativeSearch.customRelativeSearchFunction!(searchValue.current?.value);
+                if (result) {
+                    resolve(result);
+                }
+                reject([]);
+            });
+        }
+    }, [props.additionalData?.relativeSearch, (props.additionalData?.relativeSearch as RelativeSearchType)?.customRelativeSearchFunction])
+
+    const runDeepSearch = useCallback((searchKey: string, attributes: string[]) => {
+        if (!searchKey) { return [] };
+        return props.dropdownData.filter((item: any) => attributes.some((key) => {
+            const value = item[key];
+            return value.toString().toLowerCase().includes(searchKey)
+        }));
+    }, [props.dropdownData]);
+
+    const executeRelativeSearch = useCallback(() => {
+        const relativeSearch = props.additionalData?.relativeSearch;
+        if (!relativeSearch) { return [] }
+        let searchAttributes: string[] = [];
+        let isCustomFunction = false;
+        if (typeof relativeSearch === 'boolean' && relativeSearch === true) {
+            for (const dObj in props.dropdownData[0]) {
+                searchAttributes.push(dObj);
+            }
+        } else if (typeof relativeSearch === 'object' && Object.keys(relativeSearch).length > 0) {
+            if (Object.prototype.hasOwnProperty.call(relativeSearch, 'includeOnly') && relativeSearch.includeOnly!.length > 0) {
+                searchAttributes = [...relativeSearch.includeOnly!];
+            } else {
+                for (const dObj in props.dropdownData[0]) {
+                    searchAttributes.push(dObj);
+                }
+            }
+            if (Object.prototype.hasOwnProperty.call(relativeSearch, 'customRelativeSearchFunction') && typeof relativeSearch.customRelativeSearchFunction === 'function') {
+                isCustomFunction = true;
+            }
+        }
+        if (searchAttributes.length > 0) {
+            return runDeepSearch((searchValue.current?.value as string)?.toLowerCase().trim(), searchAttributes);
+        }
+        return [];
+    }, [props.dropdownData]);
+
+
     useEffect(() => {
         if(!isOnFocus) { return; }
         const listWidth = listContainerRef.current?.style;
@@ -642,9 +748,29 @@ function Core(props: InputFieldType) {
             if (objectProperty) {
                 let getValue;
                 if (typeof props.defaultValue === 'object') {
-                    getValue = props.dropdownData.find(dt => dt[objectProperty!] === props.defaultValue[objectProperty!]);
+                    if (isRelativeSearch()) {
+                        if (!isSetDefaultValueWithACustomFunction()) { return; }
+                        callSetDefaultValueWithACustomFunction().then((value: any) => {
+                            if (value && value?.[props.objectProperty!]) {
+                                searchValue.current!.value = value[props.objectProperty!];
+                            }
+                        }).catch(err => console.log(err));
+                        return;
+                    } else {
+                        getValue = props.dropdownData.find(dt => dt[objectProperty!] === props.defaultValue[objectProperty!]);
+                    }
                 } else {
-                    getValue = props.dropdownData.find(dt => dt[objectProperty!] === props.defaultValue);
+                    if (isRelativeSearch()) {
+                        if (!isSetDefaultValueWithACustomFunction()) { return; }
+                        callSetDefaultValueWithACustomFunction().then((value: any) => {
+                            if (value && value?.[props.objectProperty!]) {
+                                searchValue.current!.value = value[props.objectProperty!];
+                            }
+                        }).catch(err => console.log(err));
+                        return;
+                    } else {
+                        getValue = props.dropdownData.find(dt => dt[objectProperty!] === props.defaultValue);
+                    }
                 }
                 if (getValue) {
                     searchValue.current!.value = getValue[objectProperty];
@@ -654,7 +780,7 @@ function Core(props: InputFieldType) {
                 if (typeof props.defaultValue === 'object') {
                     getValue = props.dropdownData.find(dt => dt === props.defaultValue[objectProperty!]);
                 } else {
-                    getValue = props.dropdownData.find(dt => dt=== props.defaultValue);
+                    getValue = props.dropdownData.find(dt => dt === props.defaultValue);
                 }
                 if (getValue) {
                     searchValue.current!.value = getValue;

@@ -30,7 +30,8 @@ Documentation is now available on [modulejs.org](https://modulejs.org)
 
 | Package version | Description | 
 | :-------- | :-----------|
-| `2.1.4` | Recommended. Added Banner for readme file. Refer [modulejs.org](https://modulejs.org) for clean documentation. |
+| `2.1.5`   | Recommended. Relative Search feature has been introduced to search the entire object. Refer API usage for details. 
+| `2.1.4` | Added Banner for readme file. Refer [modulejs.org](https://modulejs.org) for clean documentation. |
 | `2.1.3`  | Stable version. Fixed a bug related to keyboard navigation. Now, keyboard navigation listeners will be removed after selection or blur. Added ESC keyboard event to close autocomplete on pressing ESC button. |
 | 2.1.1  | Added keyboard navigation events to scroll through dropdown list. Refer changelog for more information. |
 | 2.0.3 | Removed native javascript reference to get width of the div and implemented useRef. Fixed a minor bug related to width of the autocomplete dropdown list when using the module multiple times in the same component |
@@ -88,6 +89,8 @@ To run tests, clone the repository, install the packages and run the following c
 | React Autocomplete With API Lazyload    | [React Autocomplete with API Lazyload](https://stackblitz.com/edit/react-autocomplete-api-call-lazy-load)|
 | React Autocomplete Disable list with a custom function    | [React Autocomplete Disable list with a custom function](https://stackblitz.com/edit/react-autocomplete-disabled-v2)|
 | React Autocomplete View More feature Example    | [React Autocomplete View More feature Example    ](https://stackblitz.com/edit/react-autocomplete-large-data-with-virtual-scroll-r5epsy)|
+| React Autocomplete Relative Search    | [React Autocomplete Relative Search    ](https://stackblitz.com/edit/react-autocomplete-relative-search)|
+| React Autocomplete Custom Relative Search    | [React Autocomplete Custom Relative Search    ](https://stackblitz.com/edit/react-autocomplete-custom-relative-search)|
 
 
 
@@ -127,6 +130,59 @@ To run tests, clone the repository, install the packages and run the following c
 |`optViewMoreOnlyForApiCall`|`boolean`|`No`|Default is `false`. When set to `true`, API Call will not be executed on reaching the end of the scroll, instead `View More` button has to be clicked to call the API or any custom function.|
 |`showViewMore`|`boolean`|`No`|Default is `true`. `View More` List will be shown at the end of dropdown if user has configured lazy loading (`triggerApiLoadEvent` && `isApiLoad`). `View More` will appear only when API call is to be executed.|
 |`viewMoreText`|`string`|`No`|Default text is `View More`. It can be updated through `viewMoreText` as per requirement|
+| `additionalData` | `object` | `No` | `Undefined` by default. Has `relativeSearch` as one of the property.|
+| `relativeSearch` | `boolean` or `object` | `No` | Not enabled by default. `relativeSearch` is available under `additionalData` props. If `relativeSearch` is set as `true`, entire object will be searched during input search. `relativeSearch` can also be set as an object to set more custom options during search. More details found in below sections. |
+
+# Relative Search
+
+Relative search is breaking feature introduced in `2.1.5` version which allows to search the whole object. `relativeSearch` is available under `additionalData` props. 
+
+`dropdownData` should be an object and `objectProperty` should be available to make `relativeSearch` feature work.
+
+If `relativeSearch` is set to `true`, entire object will be searched during the input search.
+
+```js
+const dropdownData = `[{ sku: 12345, name: 'Apple'}, { sku: 67890, name: 'Samsung'}]`
+```
+
+```html
+<Autocomplete
+    dropdownData={dropdownData}
+    objectProperty="name"
+    broadcastSelectedValue={YOUR_CUSTOM_FUNTION($event)}
+    additionalData={{relativeSearch: true}}>
+</Autocomplete>
+```
+
+In the above example, when searched with the inputs 12345 or Apple, first object will be filtered and produced as result.
+
+`relativeSearch` also supports custom settings apart from boolean. Below attributes are supported in `relativeSearch` object.
+
+| Property | Type  | Required | Description |
+| -------- | ------- | ------- | ------- |
+| `includeOnly` | `string[]` | `optional` | Searches only the value of mentioned keys or attributes available in the object.|
+| `customRelativeSearchFunction` | `Function` | `optional` | Implementing your own custom function for relative search. This is helpful when the object has nested objects. Custom function will accept one parameter 'searchValue' in which typed input value will be passed. Use the dropdown data available in yoor component for custom filtering. Example: `[{ sku: 12345, name: 'Apple', country: [{ name: 'USA'}, { name: 'China'}]}, { sku: 67890, name: 'Samsung', country: [{ name: 'USA'}, { name: 'China'}] }]`. The module will not search the country array as they are nested and the module would not predict the nested objects or arrays as they are based on project requirements. In this case you can write your own `customRelativeSearchFunction`.|
+| `setDefaultValueWithACustomFunction`| `Function` | `optional` | If `relativeSearch` is enabled, the setting up default value using `defaultValue` props will not work. Implement your own  `setDefaultValueWithACustomFunction` and return the object (not array of objects). The returned object should be available in `dropdownData` and should contain the `objectProperty` to allow the module to set default value.|
+
+Please note that `searchFn` in the props and `additionalData`.`relativeSearch`.`customRelativeSearchFunction` has minor difference. While you can use `searchFn` to completely customize the onSearch function, `customRelativeSearchFunction` can be used to search nested objects with a custom function. Based on the requirements, any of the both custom functions can be used based on how it suits the application.
+
+```js
+const dropdownData = `[{ sku: 12345, name: 'Apple'}, { sku: 67890, name: 'Samsung'}]`
+```
+
+```html
+<Autocomplete
+    dropdownData={dropdownData}
+    broadcastSelectedValue="YOUR_CUSTOM_FUNTION($event)"
+    additionalData={{ relativeSearch: { includeOnly: ['sku'] } }}>
+</Autocomplete>
+```
+
+In the above example, only the sku attribute in the object will be searched.
+
+Checkout the stackblitz example to know how it works.
+
+It's your responsibility to check the performance impact when using the relative search for large data.
 
 # Using the module
 
@@ -329,8 +385,7 @@ Github Link - [react-autocomplete-plugin](https://github.com/nodeworld/react-aut
 
 ## Roadmap
 
-- Multi select dropdown feature in Q4 2024 or Q1 2025.
-- Extensive search - Ability to search entire object in the list
+- Multi select dropdown feature.
 
 ## Other plugins
 

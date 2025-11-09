@@ -4,6 +4,17 @@ import InputLabel from "./InputLabel";
 import Core from "./Core";
 import './Autocomplete.css';
 
+export type RelativeSearchType = {
+    includeOnly?: string[];
+    customRelativeSearchFunction?: Function;
+    setDefaultValueWithACustomFunction?: Function;
+  }
+
+export type AdditionalDataType = {
+    relativeSearch?: RelativeSearchType | boolean;
+  }
+
+
 export type AutoCompleteProps = {
     dropdownData: any[];
     objectProperty?: string;
@@ -37,6 +48,7 @@ export type AutoCompleteProps = {
     viewMoreText?: string;
     showViewMore?: boolean;
     optViewMoreOnlyForApiCall?: boolean;
+    additionalData?: AdditionalDataType;
 }
 
 function Autocomplete(props: AutoCompleteProps) {
@@ -115,6 +127,7 @@ function Autocomplete(props: AutoCompleteProps) {
                     optViewMoreOnlyForApiCall={props.optViewMoreOnlyForApiCall}
                     showViewMore={props.showViewMore}
                     viewMoreText={props.viewMoreText}
+                    additionalData={props.additionalData}
                     />
             {/* </div> */}
         </div>
